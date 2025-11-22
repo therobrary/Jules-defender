@@ -5,17 +5,25 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>NEON DEFENDER</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap');
+
+        :root {
+            --bg-color: #121212;
+            --text-color: #e0e0e0;
+            --accent-color: #ffffff;
+            --enemy-color: #aaaaaa;
+            --grid-color: #222222;
+        }
 
         body, html {
             margin: 0;
             padding: 0;
             width: 100%;
             height: 100%;
-            background-color: #050505;
+            background-color: var(--bg-color);
             overflow: hidden;
-            font-family: 'Orbitron', monospace;
-            color: #0ff;
+            font-family: 'Inter', sans-serif;
+            color: var(--text-color);
             user-select: none;
             -webkit-user-select: none;
         }
@@ -42,42 +50,63 @@
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            background: rgba(0, 0, 0, 0.85);
+            background: rgba(18, 18, 18, 0.8);
+            backdrop-filter: blur(5px);
             z-index: 10;
             text-align: center;
+            transition: opacity 0.5s ease;
         }
 
         h1 {
             font-size: 4rem;
-            text-shadow: 0 0 10px #0ff, 0 0 20px #0ff;
-            margin-bottom: 20px;
-            color: #fff;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 0.2em;
+            color: var(--accent-color);
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+            animation: fadeInDown 1s ease-out;
         }
 
         p {
             font-size: 1.2rem;
-            margin: 10px;
-            text-shadow: 0 0 5px #0f0;
-            color: #0f0;
+            margin-bottom: 2rem;
+            opacity: 0.8;
+            color: var(--text-color);
+            text-shadow: 0 0 5px rgba(255, 255, 255, 0.3);
+            animation: fadeInUp 1s ease-out 0.5s both;
         }
 
         button {
             background: transparent;
-            border: 2px solid #f0f;
-            color: #f0f;
+            border: 1px solid var(--text-color);
+            color: var(--text-color);
             padding: 15px 30px;
             font-size: 1.5rem;
-            font-family: 'Orbitron', monospace;
+            font-family: 'Inter', sans-serif;
+            text-transform: uppercase;
             cursor: pointer;
             margin-top: 30px;
-            text-shadow: 0 0 5px #f0f;
-            box-shadow: 0 0 10px #f0f;
+            border-radius: 4px;
+            text-shadow: 0 0 5px rgba(255, 255, 255, 0.5);
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
             transition: all 0.2s;
+            animation: fadeInUp 1s ease-out 0.8s both;
         }
 
         button:hover {
-            background: #f0f;
-            color: #000;
+            background: var(--text-color);
+            color: var(--bg-color);
+        }
+
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         #ui-layer {
@@ -92,25 +121,27 @@
 
         #hud {
             position: absolute;
-            top: 10px;
+            top: 20px;
             width: 100%;
             display: flex;
             justify-content: space-between;
             padding: 0 20px;
             box-sizing: border-box;
             font-size: 1.2rem;
-            text-shadow: 0 0 5px #0ff;
+            font-weight: bold;
+            color: var(--text-color);
+            text-shadow: 0 0 5px rgba(255, 255, 255, 0.5);
         }
 
         #minimap-container {
             position: absolute;
-            top: 40px;
+            top: 60px;
             left: 50%;
             transform: translateX(-50%);
             width: 40%;
             height: 40px;
-            border: 1px solid #0ff;
-            background: rgba(0, 20, 20, 0.5);
+            border: 1px solid var(--grid-color);
+            background: rgba(18, 18, 18, 0.9);
         }
 
         #mobile-controls {
@@ -128,9 +159,9 @@
             left: 20px;
             width: 150px;
             height: 150px;
-            background: rgba(0, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.05);
             border-radius: 50%;
-            border: 2px solid rgba(0, 255, 255, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
 
         .d-pad-center {
@@ -139,7 +170,7 @@
             left: 50%;
             width: 20px;
             height: 20px;
-            background: rgba(0, 255, 255, 0.5);
+            background: rgba(255, 255, 255, 0.2);
             transform: translate(-50%, -50%);
             border-radius: 50%;
         }
@@ -150,14 +181,14 @@
             right: 40px;
             width: 100px;
             height: 100px;
-            background: rgba(255, 0, 0, 0.1);
+            background: rgba(255, 255, 255, 0.05);
             border-radius: 50%;
-            border: 2px solid rgba(255, 0, 0, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.2);
             display: flex;
             justify-content: center;
             align-items: center;
             font-size: 1.2rem;
-            color: rgba(255, 0, 0, 0.8);
+            color: rgba(255, 255, 255, 0.8);
         }
 
         .hidden {
@@ -196,7 +227,7 @@
     </div>
 
     <div id="game-over-screen" class="overlay hidden">
-        <h1 style="color: #f00; text-shadow: 0 0 10px #f00;">MISSION FAILED</h1>
+        <h1 style="color: #ff5555; text-shadow: 0 0 10px rgba(255, 85, 85, 0.5);">MISSION FAILED</h1>
         <p id="final-score">SCORE: 0</p>
         <button id="restart-btn">REBOOT</button>
     </div>
@@ -219,13 +250,14 @@ const CONFIG = {
     ENEMY_SPEED: 2,
     SPAWN_RATE: 100, // Frames between spawns
     COLORS: {
-        bg: '#050505',
-        player: '#0ff',
-        enemy: '#f0f',
-        laser: '#ff0',
-        particle: '#fff',
-        minimap_player: '#0ff',
-        minimap_enemy: '#f00'
+        bg: '#121212',
+        player: '#ffffff',
+        enemy: '#aaaaaa',
+        laser: '#e0e0e0',
+        particle: '#dddddd',
+        minimap_player: '#ffffff',
+        minimap_enemy: '#ff5555',
+        grid: '#222222'
     }
 };
 
@@ -336,8 +368,9 @@ const Input = {
         const maxDist = rect.width / 2;
 
         this.touch.active = true;
-        this.touch.dx = Math.max(-1, Math.min(1, dx / (maxDist * 0.5))); // Sensitivity
-        this.touch.dy = Math.max(-1, Math.min(1, dy / (maxDist * 0.5)));
+        // Reduced sensitivity: divisor is maxDist * 1.0 instead of 0.5
+        this.touch.dx = Math.max(-1, Math.min(1, dx / (maxDist * 1.0)));
+        this.touch.dy = Math.max(-1, Math.min(1, dy / (maxDist * 1.0)));
     }
 };
 
@@ -412,13 +445,13 @@ const Game = {
         this.player = new Player(CONFIG.WORLD_WIDTH / 2, this.height / 2);
         this.entities.push(this.player);
 
-        // Generate Stars
+        // Stars kept for subtle background motion (rendered at 0.3 opacity)
         this.stars = [];
         for(let i=0; i<CONFIG.STAR_COUNT; i++) {
             this.stars.push({
                 x: Math.random() * CONFIG.WORLD_WIDTH,
                 y: Math.random() * this.height,
-                size: Math.random() * 2,
+                size: Math.random() * 1.5,
                 speed: Math.random() * 0.5 + 0.1
             });
         }
@@ -546,48 +579,62 @@ const Game = {
 
         this.ctx.save();
 
-        // Draw Stars (Parallax)
-        this.ctx.fillStyle = '#fff';
+        // Draw Grid Background (moves with world camera)
+        // Let's make a static grid relative to world
+        const GRID_SIZE = 50;
+        this.ctx.strokeStyle = CONFIG.COLORS.grid;
+        this.ctx.lineWidth = 1;
+
+        // Calculate offset based on camera
+        // We want grid lines to move with the world
+        let startX = Math.floor(this.cameraX / GRID_SIZE) * GRID_SIZE;
+
+        // Vertical lines
+        for (let x = startX; x < startX + this.width + GRID_SIZE; x += GRID_SIZE) {
+             let drawX = x - this.cameraX;
+             this.ctx.beginPath();
+             this.ctx.moveTo(drawX, 0);
+             this.ctx.lineTo(drawX, this.height);
+             this.ctx.stroke();
+        }
+        // Horizontal lines (camera-aware)
+        let startY = Math.floor(this.cameraY / GRID_SIZE) * GRID_SIZE;
+        for (let y = startY; y < startY + this.height + GRID_SIZE; y += GRID_SIZE) {
+             let drawY = y - this.cameraY;
+             this.ctx.beginPath();
+             this.ctx.moveTo(0, drawY);
+             this.ctx.lineTo(this.width, drawY);
+             this.ctx.stroke();
+        }
+
+
+        // Draw Stars (Subtle in background)
+        this.ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
         this.stars.forEach(s => {
             // Parallax x relative to camera
             let x = s.x - this.cameraX * 0.5;
             // Wrap star x
             x = ((x % CONFIG.WORLD_WIDTH) + CONFIG.WORLD_WIDTH) % CONFIG.WORLD_WIDTH;
 
-            // If x is within screen view (0 to this.width)
-            // We might need to draw it twice if it's on the edge
-            this.drawWrapped(x, s.y, () => {
-                this.ctx.fillRect(0, 0, s.size, s.size); // 0,0 relative to translation
-            });
+            this.ctx.fillRect(x, s.y, s.size, s.size);
         });
 
         // Draw Terrain Line
-        this.ctx.strokeStyle = '#0f0';
+        this.ctx.strokeStyle = '#333';
         this.ctx.lineWidth = 2;
-        this.ctx.shadowBlur = 5;
-        this.ctx.shadowColor = '#0f0';
+        this.ctx.shadowBlur = 0;
         this.ctx.beginPath();
         // Simple line at bottom
         let groundY = this.height - 20;
         this.ctx.moveTo(0, groundY);
         this.ctx.lineTo(this.width, groundY);
         this.ctx.stroke();
-        this.ctx.shadowBlur = 0;
 
         // Draw Entities
         this.entities.forEach(e => {
             // Draw relative to camera
             let rx = e.x - this.cameraX;
             // Wrap rx to be near screen
-            // We want rx to be between -Border and Screen+Border
-            // E.g. if camera is at 3900 and entity is at 100 (World 4000).
-            // rx = 100 - 3900 = -3800.
-            // We want it to appear at 200 (right of camera).
-            // So we add WorldWidth.
-
-            // Simple logic: normalize rx to -World/2 to +World/2
-            // rx = ((rx + WW/2) % WW) - WW/2 is standard wrap, but % in JS is remainder.
-
             let drawnX = rx;
             while (drawnX < -100) drawnX += CONFIG.WORLD_WIDTH;
             while (drawnX > this.width + 100) drawnX -= CONFIG.WORLD_WIDTH;
@@ -616,17 +663,11 @@ const Game = {
         this.drawMinimap();
     },
 
-    drawWrapped: function(x, y, drawFn) {
-        // Helper? Maybe not needed with the logic above.
-        // Just keep the logic above.
-    },
-
     drawMinimap: function() {
         const mmW = this.minimapCanvas.width;
         const mmH = this.minimapCanvas.height;
         const scaleX = mmW / CONFIG.WORLD_WIDTH;
-        const scaleY = mmH / this.height; // Or keep aspect ratio?
-        // Minimap usually compresses height significantly or uses a "radar" view.
+        const scaleY = mmH / this.height;
 
         this.minimapCtx.clearRect(0, 0, mmW, mmH);
         this.minimapCtx.fillStyle = '#000';
@@ -637,7 +678,7 @@ const Game = {
         let camX = ((this.cameraX % CONFIG.WORLD_WIDTH) + CONFIG.WORLD_WIDTH) % CONFIG.WORLD_WIDTH;
         let camW = this.width;
 
-        this.minimapCtx.strokeStyle = '#333';
+        this.minimapCtx.strokeStyle = '#555';
         this.minimapCtx.strokeRect(camX * scaleX, 0, camW * scaleX, mmH);
         // Handle wrap for frame
         if (camX + camW > CONFIG.WORLD_WIDTH) {
@@ -646,7 +687,7 @@ const Game = {
 
         this.entities.forEach(e => {
             let mx = e.x * scaleX;
-            let my = e.y * scaleY; // Y is less important in defender radar usually, but we can map it.
+            let my = e.y * scaleY;
 
             if (e.type === 'player') this.minimapCtx.fillStyle = CONFIG.COLORS.minimap_player;
             else if (e.type === 'enemy') this.minimapCtx.fillStyle = CONFIG.COLORS.minimap_enemy;
@@ -757,8 +798,9 @@ class Player extends Entity {
 
         ctx.strokeStyle = CONFIG.COLORS.player;
         ctx.lineWidth = 2;
-        ctx.shadowColor = CONFIG.COLORS.player;
-        ctx.shadowBlur = 10;
+        // Stronger white glow
+        ctx.shadowColor = '#ffffff';
+        ctx.shadowBlur = 20;
 
         ctx.beginPath();
         if (this.facingRight) {
@@ -767,27 +809,27 @@ class Player extends Entity {
             ctx.lineTo(-15, 7);
             ctx.lineTo(-10, 0);
             ctx.closePath();
-
-            // Engine flame
-            if (Math.random() > 0.5) {
-                ctx.moveTo(-15, 0);
-                ctx.lineTo(-25, 0);
-                ctx.stroke();
-            }
         } else {
             ctx.moveTo(15, -7);
             ctx.lineTo(-15, 0);
             ctx.lineTo(15, 7);
             ctx.lineTo(10, 0);
             ctx.closePath();
-             // Engine flame
-             if (Math.random() > 0.5) {
-                ctx.moveTo(15, 0);
-                ctx.lineTo(25, 0);
-                ctx.stroke();
-            }
         }
         ctx.stroke();
+
+        // Engine flame (simple line, less "fire")
+        ctx.beginPath();
+        ctx.strokeStyle = '#ccc';
+        if (this.facingRight && Math.random() > 0.5) {
+            ctx.moveTo(-15, 0);
+            ctx.lineTo(-25, 0);
+        } else if (!this.facingRight && Math.random() > 0.5) {
+            ctx.moveTo(15, 0);
+            ctx.lineTo(25, 0);
+        }
+        ctx.stroke();
+
         ctx.shadowBlur = 0;
     }
 
@@ -854,8 +896,9 @@ class Lander extends Entity {
     draw(ctx) {
         ctx.strokeStyle = CONFIG.COLORS.enemy;
         ctx.lineWidth = 2;
+        // Stronger grey glow
         ctx.shadowColor = CONFIG.COLORS.enemy;
-        ctx.shadowBlur = 10;
+        ctx.shadowBlur = 15;
 
         ctx.beginPath();
         ctx.moveTo(-10, -10);
@@ -899,18 +942,6 @@ class Bullet extends Entity {
         this.life -= dt;
         if (this.life <= 0) this.dead = true;
 
-        // Bullets move fast, simple Euler
-        // We used per-frame logic for player, but here vx is set high.
-        // Player fire sets vx to LASER_SPEED (15).
-        // 15 * 60 = 900 px/s.
-        // So we need to adjust if we use dt logic.
-        // Let's treat vx as pixels/frame for now to match legacy logic style
-        // OR fix everything to px/sec.
-        // Let's fix to px/sec.
-        // LASER_SPEED 15 is too slow if it's px/s.
-        // If it was px/frame, it's 900 px/s.
-        // Let's multiply by 60 in update for "frame-based units normalized to time"
-
         this.x += this.vx * (dt * 60);
 
         if (this.x < 0) this.x += CONFIG.WORLD_WIDTH;
@@ -919,8 +950,9 @@ class Bullet extends Entity {
 
     draw(ctx) {
         ctx.fillStyle = CONFIG.COLORS.laser;
+        // Stronger laser glow
         ctx.shadowColor = CONFIG.COLORS.laser;
-        ctx.shadowBlur = 10;
+        ctx.shadowBlur = 15;
         ctx.fillRect(-10, -2, 20, 4);
         ctx.shadowBlur = 0;
     }
