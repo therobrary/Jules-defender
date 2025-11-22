@@ -445,7 +445,7 @@ const Game = {
         this.player = new Player(CONFIG.WORLD_WIDTH / 2, this.height / 2);
         this.entities.push(this.player);
 
-        // Generate Stars (Optional for new aesthetic, but kept for motion)
+        // Stars kept for subtle background motion (rendered at 0.3 opacity)
         this.stars = [];
         for(let i=0; i<CONFIG.STAR_COUNT; i++) {
             this.stars.push({
