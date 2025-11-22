@@ -797,7 +797,6 @@ class Player extends Entity {
         if (this.invulnerable && Math.floor(Date.now() / 100) % 2 === 0) return; // Blink
 
         ctx.strokeStyle = CONFIG.COLORS.player;
-        ctx.fillStyle = '#fff';
         ctx.lineWidth = 2;
         // Stronger white glow
         ctx.shadowColor = '#ffffff';
