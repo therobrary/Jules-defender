@@ -579,7 +579,7 @@ const Game = {
 
         this.ctx.save();
 
-        // Draw Grid Background (parallax?)
+        // Draw Grid Background (moves with world camera)
         // Let's make a static grid relative to world
         const GRID_SIZE = 50;
         this.ctx.strokeStyle = CONFIG.COLORS.grid;
