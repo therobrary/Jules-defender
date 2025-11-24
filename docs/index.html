@@ -1094,6 +1094,9 @@ class PowerUp extends Entity {
         if (this.life <= 0) this.dead = true;
 
         super.update(dt);
+        // Clamp Y position so power-up stays on screen
+        if (this.y < 0) this.y = 0;
+        if (this.y > Game.H) this.y = Game.H;
     }
 
     draw(ctx) {
