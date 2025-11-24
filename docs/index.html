@@ -846,11 +846,17 @@ class Player extends Entity {
         // Update Powerup Timers
         if (this.rapidActive) {
             this.rapidTimer -= dt;
-            if (this.rapidTimer <= 0) this.rapidActive = false;
+            if (this.rapidTimer <= 0) {
+                this.rapidActive = false;
+                this.rapidTimer = 0;
+            }
         }
         if (this.speedActive) {
             this.speedTimer -= dt;
-            if (this.speedTimer <= 0) this.speedActive = false;
+            if (this.speedTimer <= 0) {
+                this.speedActive = false;
+                this.speedTimer = 0;
+            }
         }
         Game.updateHUD(); // Refresh HUD for timers
 
