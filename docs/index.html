@@ -862,7 +862,7 @@ class Player extends Entity {
 
         // Input Handling
         let ACCEL_X = CONFIG.PLAYER_ACCEL_X * dt;
-        const ACCEL_Y = CONFIG.PLAYER_ACCEL_Y * dt;
+        let ACCEL_Y = CONFIG.PLAYER_ACCEL_Y * dt;
         let MAX_SPEED_X = CONFIG.PLAYER_MAX_SPEED_X;
 
         if (this.speedActive) {
