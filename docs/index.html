@@ -905,12 +905,14 @@ class Player extends Entity {
         if (this.invulnerable && Math.floor(Date.now() / 100) % 2 === 0) return; // Blink
 
         if (this.shieldActive) {
+            ctx.save();
             ctx.strokeStyle = CONFIG.COLORS.shield;
             ctx.shadowColor = CONFIG.COLORS.shield;
             ctx.shadowBlur = 10;
             ctx.beginPath();
             ctx.arc(0, 0, 25, 0, Math.PI * 2);
             ctx.stroke();
+            ctx.restore();
         }
 
         ctx.strokeStyle = CONFIG.COLORS.player;
