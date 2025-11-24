@@ -1020,7 +1020,14 @@ class Player extends Entity {
     deactivateShield() {
         this.shieldActive = false;
         this.invulnerable = true;
-        setTimeout(() => { this.invulnerable = false; }, 1000); // Brief iframe after shield loss
+        if (this.invulTimeoutId !== null) {
+            clearTimeout(this.invulTimeoutId);
+            this.invulTimeoutId = null;
+        }
+        this.invulTimeoutId = setTimeout(() => {
+            this.invulnerable = false;
+            this.invulTimeoutId = null;
+        }, 1000); // Brief iframe after shield loss
         AudioSys.playTone(200, 'sawtooth', 0.5); // Shield break sound
         Game.updateHUD();
     }
