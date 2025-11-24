@@ -231,6 +231,12 @@
         <p id="final-score">SCORE: 0</p>
         <button id="restart-btn">REBOOT</button>
     </div>
+
+    <div id="pause-screen" class="overlay hidden">
+        <h1>PAUSED</h1>
+        <button id="resume-btn">RESUME</button>
+        <button id="quit-btn">QUIT</button>
+    </div>
 </div>
 
 <script>
@@ -243,12 +249,15 @@
 const CONFIG = {
     WORLD_WIDTH: 4000, // Width of the game world (pixels)
     STAR_COUNT: 150,
-    PLAYER_SPEED: 0.5, // Acceleration
-    PLAYER_MAX_SPEED: 10,
+    PLAYER_ACCEL_X: 500, // Horizontal Acceleration
+    PLAYER_ACCEL_Y: 250, // Vertical Acceleration (Reduced sensitivity)
+    PLAYER_MAX_SPEED_X: 9,
+    PLAYER_MAX_SPEED_Y: 4, // Reduced vertical max speed
     PLAYER_FRICTION: 0.96,
     LASER_SPEED: 15,
     ENEMY_SPEED: 2,
     SPAWN_RATE: 100, // Frames between spawns
+    POWERUP_CHANCE: 0.2, // 20% chance
     COLORS: {
         bg: '#121212',
         player: '#ffffff',
@@ -257,8 +266,17 @@ const CONFIG = {
         particle: '#dddddd',
         minimap_player: '#ffffff',
         minimap_enemy: '#ff5555',
-        grid: '#222222'
+        grid: '#222222',
+        shield: '#00ffff',
+        rapid: '#ffff00',
+        speed: '#00ff00'
     }
+};
+
+const POWERUPS = {
+    SHIELD: 'SHIELD',
+    RAPID: 'RAPID',
+    SPEED: 'SPEED'
 };
 
 // --- AUDIO SYSTEM ---
@@ -321,7 +339,10 @@ const Input = {
     keys: {},
     touch: { active: false, dx: 0, dy: 0, fire: false },
     init: function() {
-        window.addEventListener('keydown', e => this.keys[e.code] = true);
+        window.addEventListener('keydown', e => {
+            this.keys[e.code] = true;
+            if (e.code === 'Escape') Game.togglePause();
+        });
         window.addEventListener('keyup', e => this.keys[e.code] = false);
 
         // Mobile Controls
@@ -384,6 +405,7 @@ const Game = {
     height: 0,
     lastTime: 0,
     running: false,
+    paused: false,
 
     cameraX: 0,
 
@@ -408,6 +430,8 @@ const Game = {
 
         document.getElementById('start-btn').addEventListener('click', () => this.start());
         document.getElementById('restart-btn').addEventListener('click', () => this.start());
+        document.getElementById('resume-btn').addEventListener('click', () => this.togglePause());
+        document.getElementById('quit-btn').addEventListener('click', () => this.quitGame());
     },
 
     resize: function() {
@@ -426,12 +450,35 @@ const Game = {
         AudioSys.init();
         document.getElementById('start-screen').classList.add('hidden');
         document.getElementById('game-over-screen').classList.add('hidden');
+        document.getElementById('pause-screen').classList.add('hidden');
         document.getElementById('ui-layer').style.display = 'block';
 
         this.resetGame();
         this.running = true;
+        this.paused = false;
         this.lastTime = performance.now();
         requestAnimationFrame(t => this.loop(t));
+    },
+
+    togglePause: function() {
+        if (!this.running) return;
+        this.paused = !this.paused;
+        const pauseScreen = document.getElementById('pause-screen');
+        if (this.paused) {
+            pauseScreen.classList.remove('hidden');
+        } else {
+            pauseScreen.classList.add('hidden');
+            this.lastTime = performance.now(); // Prevent dt jump
+            requestAnimationFrame(t => this.loop(t));
+        }
+    },
+
+    quitGame: function() {
+        this.running = false;
+        this.paused = false;
+        document.getElementById('pause-screen').classList.add('hidden');
+        document.getElementById('ui-layer').style.display = 'none';
+        document.getElementById('start-screen').classList.remove('hidden');
     },
 
     resetGame: function() {
@@ -480,6 +527,8 @@ const Game = {
 
     loop: function(now) {
         if (!this.running) return;
+        if (this.paused) return; // Stop loop when paused
+
         const dt = (now - this.lastTime) / 1000;
         this.lastTime = now;
 
@@ -520,6 +569,9 @@ const Game = {
         // Collisions
         this.checkCollisions();
 
+        // Check Powerups
+        this.checkPowerups();
+
         // Input Fire (Debounce handled in Player)
         if ((Input.keys['Space'] || Input.touch.fire) && this.player.canFire()) {
             this.player.fire();
@@ -547,9 +599,28 @@ const Game = {
         if (!player.dead && !player.invulnerable) {
             for (let e of enemies) {
                 if (this.checkRectOverlap(player, e)) {
-                    player.die();
-                    e.takeDamage(); // ramming kills enemy too?
+                    if (player.shieldActive) {
+                        player.deactivateShield();
+                        e.takeDamage(); // Shield also kills the enemy on contact
+                    } else {
+                        player.die();
+                        e.takeDamage(); // ramming kills enemy too?
+                    }
                 }
+            }
+        }
+    },
+
+    checkPowerups: function() {
+        const powerups = this.entities.filter(e => e.type === 'powerup');
+        const player = this.player;
+
+        for (let p of powerups) {
+            if (this.checkRectOverlap(player, p)) {
+                p.dead = true;
+                player.activatePowerup(p.kind);
+                AudioSys.playTone(600, 'sine', 0.1);
+                AudioSys.playTone(800, 'sine', 0.1, 0.1); // Powerup sound
             }
         }
     },
@@ -699,7 +770,13 @@ const Game = {
 
     updateHUD: function() {
         document.getElementById('score-display').innerText = `SCORE: ${this.score}`;
-        document.getElementById('lives-display').innerText = `LIVES: ${this.lives}`;
+        let statusText = `LIVES: ${this.lives}`;
+
+        if (this.player && this.player.shieldActive) statusText += " | SHIELD";
+        if (this.player && this.player.rapidActive) statusText += " | RAPID";
+        if (this.player && this.player.speedActive) statusText += " | SPEED";
+
+        document.getElementById('lives-display').innerText = statusText;
     },
 
     spawnExplosion: function(x, y, color) {
@@ -755,16 +832,45 @@ class Player extends Entity {
         this.facingRight = true;
         this.lastFireTime = 0;
         this.invulnerable = false;
+
+        // Powerups
+        this.shieldActive = false;
+        this.rapidActive = false;
+        this.speedActive = false;
+
+        this.rapidTimer = 0;
+        this.speedTimer = 0;
     }
 
     update(dt) {
+        // Update Powerup Timers
+        if (this.rapidActive) {
+            this.rapidTimer -= dt;
+            if (this.rapidTimer <= 0) {
+                this.rapidActive = false;
+                this.rapidTimer = 0;
+            }
+        }
+        if (this.speedActive) {
+            this.speedTimer -= dt;
+            if (this.speedTimer <= 0) {
+                this.speedActive = false;
+                this.speedTimer = 0;
+            }
+        }
+        Game.updateHUD(); // Refresh HUD for timers
+
         // Input Handling
-        // We need to scale acceleration by dt to be framerate independent
-        // dt is in seconds.
-        // Let's say Acceleration is 600 px/s^2.
-        const ACCEL = 600 * dt;
-        const MAX_SPEED = 10; // px per frame? 10 * 60 = 600 px/s.
-        const FRICTION = Math.pow(CONFIG.PLAYER_FRICTION, dt * 60); // Adjust friction for dt
+        let ACCEL_X = CONFIG.PLAYER_ACCEL_X * dt;
+        let ACCEL_Y = CONFIG.PLAYER_ACCEL_Y * dt;
+        let MAX_SPEED_X = CONFIG.PLAYER_MAX_SPEED_X;
+
+        if (this.speedActive) {
+            ACCEL_X *= 2;
+            MAX_SPEED_X *= 1.5;
+        }
+
+        const FRICTION = Math.pow(CONFIG.PLAYER_FRICTION, dt * 60);
 
         let inputX = 0;
         let inputY = 0;
@@ -775,16 +881,24 @@ class Player extends Entity {
         if (Input.keys['ArrowRight'] || Input.touch.dx > 0.2) inputX = 1;
 
         if (inputX !== 0) {
-            this.vx += inputX * ACCEL;
+            this.vx += inputX * ACCEL_X;
             this.facingRight = inputX > 0;
         }
         if (inputY !== 0) {
-            this.vy += inputY * ACCEL;
+            this.vy += inputY * ACCEL_Y;
         }
 
         // Friction
         this.vx *= FRICTION;
         this.vy *= FRICTION;
+
+        // Clamp Speed
+        if (Math.abs(this.vx) > MAX_SPEED_X) {
+            this.vx = Math.sign(this.vx) * MAX_SPEED_X;
+        }
+        if (Math.abs(this.vy) > CONFIG.PLAYER_MAX_SPEED_Y) {
+            this.vy = Math.sign(this.vy) * CONFIG.PLAYER_MAX_SPEED_Y;
+        }
 
         // Bounds Y
         if (this.y < 50) this.y = 50;
@@ -795,6 +909,17 @@ class Player extends Entity {
 
     draw(ctx) {
         if (this.invulnerable && Math.floor(Date.now() / 100) % 2 === 0) return; // Blink
+
+        if (this.shieldActive) {
+            ctx.save();
+            ctx.strokeStyle = CONFIG.COLORS.shield;
+            ctx.shadowColor = CONFIG.COLORS.shield;
+            ctx.shadowBlur = 10;
+            ctx.beginPath();
+            ctx.arc(0, 0, 25, 0, Math.PI * 2);
+            ctx.stroke();
+            ctx.restore();
+        }
 
         ctx.strokeStyle = CONFIG.COLORS.player;
         ctx.lineWidth = 2;
@@ -835,7 +960,8 @@ class Player extends Entity {
 
     canFire() {
         const now = performance.now();
-        if (now - this.lastFireTime > 200) { // 200ms fire rate
+        const rate = this.rapidActive ? 50 : 200; // 50ms vs 200ms
+        if (now - this.lastFireTime > rate) {
             return true;
         }
         return false;
@@ -858,6 +984,12 @@ class Player extends Entity {
     die() {
         Game.spawnExplosion(this.x, this.y, CONFIG.COLORS.player);
         Game.lives--;
+
+        // Reset powerups on death
+        this.shieldActive = false;
+        this.rapidActive = false;
+        this.speedActive = false;
+
         Game.updateHUD();
         if (Game.lives <= 0) {
             Game.gameOver();
@@ -870,6 +1002,34 @@ class Player extends Entity {
             this.invulnerable = true;
             setTimeout(() => { this.invulnerable = false; }, 2000);
         }
+    }
+
+    activatePowerup(kind) {
+        if (kind === POWERUPS.SHIELD) {
+            this.shieldActive = true;
+        } else if (kind === POWERUPS.RAPID) {
+            this.rapidActive = true;
+            this.rapidTimer = 10.0; // 10 seconds
+        } else if (kind === POWERUPS.SPEED) {
+            this.speedActive = true;
+            this.speedTimer = 10.0; // 10 seconds
+        }
+        Game.updateHUD();
+    }
+
+    deactivateShield() {
+        this.shieldActive = false;
+        this.invulnerable = true;
+        if (this.invulTimeoutId !== null) {
+            clearTimeout(this.invulTimeoutId);
+            this.invulTimeoutId = null;
+        }
+        this.invulTimeoutId = setTimeout(() => {
+            this.invulnerable = false;
+            this.invulTimeoutId = null;
+        }, 1000); // Brief iframe after shield loss
+        AudioSys.playTone(200, 'sawtooth', 0.5); // Shield break sound
+        Game.updateHUD();
     }
 }
 
@@ -923,6 +1083,58 @@ class Lander extends Entity {
         Game.score += 100;
         Game.updateHUD();
         Game.spawnExplosion(this.x, this.y, CONFIG.COLORS.enemy);
+
+        if (Math.random() < CONFIG.POWERUP_CHANCE) {
+            const types = [POWERUPS.SHIELD, POWERUPS.RAPID, POWERUPS.SPEED];
+            const kind = types[Math.floor(Math.random() * types.length)];
+            Game.entities.push(new PowerUp(this.x, this.y, kind));
+        }
+    }
+}
+
+class PowerUp extends Entity {
+    constructor(x, y, kind) {
+        super(x, y);
+        this.type = 'powerup';
+        this.kind = kind;
+        this.w = 15;
+        this.h = 15;
+        this.vx = (Math.random() - 0.5) * 1;
+        this.vy = (Math.random() - 0.5) * 1;
+        this.life = 10.0; // Disappear after 10s if not picked
+    }
+
+    update(dt) {
+        this.life -= dt;
+        if (this.life <= 0) this.dead = true;
+
+        super.update(dt);
+        // Clamp Y position so power-up stays on screen
+        if (this.y < 0) this.y = 0;
+        if (this.y > Game.H) this.y = Game.H;
+    }
+
+    draw(ctx) {
+        let color = '#fff';
+        let text = '?';
+        if (this.kind === POWERUPS.SHIELD) { color = CONFIG.COLORS.shield; text = 'S'; }
+        if (this.kind === POWERUPS.RAPID) { color = CONFIG.COLORS.rapid; text = 'R'; }
+        if (this.kind === POWERUPS.SPEED) { color = CONFIG.COLORS.speed; text = 'F'; } // F for Fast
+
+        ctx.strokeStyle = color;
+        ctx.lineWidth = 2;
+        ctx.shadowColor = color;
+        ctx.shadowBlur = 10;
+
+        ctx.strokeRect(-7, -7, 14, 14);
+
+        ctx.fillStyle = color;
+        ctx.font = '10px Inter';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(text, 0, 1);
+
+        ctx.shadowBlur = 0;
     }
 }
 
