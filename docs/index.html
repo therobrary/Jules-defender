@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>NEON DEFENDER</title>
+    <title>Robrary Games: Defender</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap');
 
@@ -148,7 +148,7 @@
             position: absolute;
             bottom: 20px;
             width: 100%;
-            height: 150px;
+            height: 250px;
             display: none; /* Shown via JS detection */
             pointer-events: auto;
         }
@@ -191,6 +191,32 @@
             color: rgba(255, 255, 255, 0.8);
         }
 
+        .action-btn {
+            position: absolute;
+            width: 70px;
+            height: 70px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 50%;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.8);
+        }
+        #bomb-btn {
+            bottom: 150px;
+            right: 40px;
+            border-color: #ff5555;
+            color: #ff5555;
+        }
+        #warp-btn {
+            bottom: 40px;
+            right: 150px;
+            border-color: #00ffff;
+            color: #00ffff;
+        }
+
         .hidden {
             display: none !important;
         }
@@ -205,7 +231,7 @@
     <div id="ui-layer">
         <div id="hud">
             <div id="score-display">SCORE: 0</div>
-            <div id="lives-display">LIVES: 3</div>
+            <div id="lives-display">LIVES: 3 | BOMBS: 3</div>
         </div>
         <div id="minimap-container">
             <canvas id="minimapCanvas"></canvas>
@@ -216,13 +242,16 @@
                 <div class="d-pad-center"></div>
             </div>
             <div class="fire-btn" id="fireBtn">FIRE</div>
+            <div class="action-btn" id="bomb-btn">BOMB</div>
+            <div class="action-btn" id="warp-btn">WARP</div>
         </div>
     </div>
 
     <div id="start-screen" class="overlay">
-        <h1>NEON DEFENDER</h1>
+        <h1>Robrary Games: Defender</h1>
         <p>ARROWS to Fly | SPACE to Fire</p>
-        <p>Touch: Left stick to Fly | Right button to Fire</p>
+        <p>B to Bomb | H to Warp</p>
+        <p>Touch: Left stick to Fly | Right buttons to Act</p>
         <button id="start-btn">INITIATE SYSTEM</button>
     </div>
 
@@ -342,12 +371,17 @@ const Input = {
         window.addEventListener('keydown', e => {
             this.keys[e.code] = true;
             if (e.code === 'Escape') Game.togglePause();
+            // Feature Inputs
+            if (e.key === 'b' || e.key === 'B') Game.triggerSmartBomb();
+            if (e.key === 'h' || e.key === 'H') Game.player && Game.player.hyperspace();
         });
         window.addEventListener('keyup', e => this.keys[e.code] = false);
 
         // Mobile Controls
         const dpad = document.getElementById('dpad');
         const fireBtn = document.getElementById('fireBtn');
+        const bombBtn = document.getElementById('bomb-btn');
+        const warpBtn = document.getElementById('warp-btn');
 
         // Check for touch device roughly
         if ('ontouchstart' in window || navigator.maxTouchPoints) {
@@ -373,6 +407,18 @@ const Input = {
             e.preventDefault();
             this.touch.fire = false;
         });
+
+        // Bomb Logic (Touch)
+        bombBtn.addEventListener('touchstart', e => {
+            e.preventDefault();
+            Game.triggerSmartBomb();
+        }, {passive: false});
+
+        // Warp Logic (Touch)
+        warpBtn.addEventListener('touchstart', e => {
+            e.preventDefault();
+            if(Game.player) Game.player.hyperspace();
+        }, {passive: false});
     },
     handleDpad: function(e) {
         e.preventDefault();
@@ -486,6 +532,7 @@ const Game = {
         this.particles = [];
         this.score = 0;
         this.lives = 3;
+        this.smartBombs = 3;
         this.wave = 1;
         this.cameraX = 0;
 
@@ -583,13 +630,22 @@ const Game = {
         const enemies = this.entities.filter(e => e.type === 'enemy');
         const player = this.player;
 
-        // Bullet vs Enemy
+        // Bullet vs Enemy / Player
         for (let b of bullets) {
             if (b.owner === 'player') {
                 for (let e of enemies) {
                     if (this.checkRectOverlap(b, e)) {
                         b.dead = true;
                         e.takeDamage();
+                    }
+                }
+            } else if (b.owner === 'enemy') {
+                if (!player.dead && !player.invulnerable && this.checkRectOverlap(b, player)) {
+                    b.dead = true;
+                    if (player.shieldActive) {
+                        player.deactivateShield();
+                    } else {
+                        player.die();
                     }
                 }
             }
@@ -770,7 +826,7 @@ const Game = {
 
     updateHUD: function() {
         document.getElementById('score-display').innerText = `SCORE: ${this.score}`;
-        let statusText = `LIVES: ${this.lives}`;
+        let statusText = `LIVES: ${this.lives} | BOMBS: ${this.smartBombs}`;
 
         if (this.player && this.player.shieldActive) statusText += " | SHIELD";
         if (this.player && this.player.rapidActive) statusText += " | RAPID";
@@ -784,6 +840,47 @@ const Game = {
         for(let i=0; i<10; i++) {
             this.particles.push(new Particle(x, y, color));
         }
+    },
+
+    triggerSmartBomb: function() {
+        if (this.smartBombs <= 0) return;
+        if (!this.player || this.player.dead) return;
+
+        this.smartBombs--;
+        this.updateHUD();
+        AudioSys.playTone(100, 'sawtooth', 1.0, 0.5); // Deep boom
+
+        // Flash screen
+        const flash = document.createElement('div');
+        flash.style.position = 'absolute';
+        flash.style.top = '0';
+        flash.style.left = '0';
+        flash.style.width = '100%';
+        flash.style.height = '100%';
+        flash.style.background = '#fff';
+        flash.style.zIndex = '100';
+        flash.style.opacity = '1';
+        flash.style.transition = 'opacity 0.5s ease-out';
+        document.body.appendChild(flash);
+        setTimeout(() => {
+            flash.style.opacity = '0';
+            setTimeout(() => flash.remove(), 500);
+        }, 50);
+
+        // Kill all enemies on screen
+        const enemies = this.entities.filter(e => e.type === 'enemy');
+        let count = 0;
+        enemies.forEach(e => {
+            // Check if on screen (similar logic to Lander.fire)
+            let rx = e.x - this.cameraX;
+            while (rx < -100) rx += CONFIG.WORLD_WIDTH;
+            while (rx > this.width + 100) rx -= CONFIG.WORLD_WIDTH;
+
+            if (rx > -50 && rx < this.width + 50) {
+                 e.takeDamage();
+                 count++;
+            }
+        });
     }
 };
 
@@ -1031,6 +1128,31 @@ class Player extends Entity {
         AudioSys.playTone(200, 'sawtooth', 0.5); // Shield break sound
         Game.updateHUD();
     }
+
+    hyperspace() {
+        if (this.dead) return;
+
+        // Visual vanish effect at old pos
+        Game.spawnExplosion(this.x, this.y, '#00ffff');
+        AudioSys.playTone(800, 'triangle', 0.5, 0.3);
+
+        // Randomize Position
+        this.x = Math.random() * CONFIG.WORLD_WIDTH;
+        this.y = Math.random() * (Game.height - 100) + 50;
+        this.vx = 0;
+        this.vy = 0;
+
+        // Risk of death (10%)
+        if (Math.random() < 0.10) {
+            setTimeout(() => {
+                console.log("Hyperspace Malfunction");
+                this.die();
+            }, 200);
+        } else {
+             // Visual appear effect
+             Game.spawnExplosion(this.x, this.y, '#ffffff');
+        }
+    }
 }
 
 class Lander extends Entity {
@@ -1041,6 +1163,7 @@ class Lander extends Entity {
         this.h = 20;
         this.timer = Math.random() * 100;
         this.vx = (Math.random() - 0.5) * 2; // Drift
+        this.fireTimer = Math.random() * 3 + 2; // Random start delay
     }
 
     update(dt) {
@@ -1048,9 +1171,51 @@ class Lander extends Entity {
         // Bobbing motion
         this.vy = Math.sin(this.timer) * 1;
 
-        // Drift towards player slowly?
-        // Or just patrol.
+        // Shooting logic
+        this.fireTimer -= dt;
+        if (this.fireTimer <= 0) {
+            this.fireTimer = Math.random() * 4 + 2; // Fire every 2-6 seconds
+            this.fire();
+        }
+
         super.update(dt);
+    }
+
+    fire() {
+        // Only fire if on screen
+        if (!Game.player || Game.player.dead) return;
+
+        // Simple on-screen check (approximate, ignores wrap edge cases for simplicity)
+        // Check relative to camera
+        let rx = this.x - Game.cameraX;
+        while (rx < -100) rx += CONFIG.WORLD_WIDTH;
+        while (rx > Game.width + 100) rx -= CONFIG.WORLD_WIDTH;
+
+        if (rx > 0 && rx < Game.width) {
+            // Calculate vector to player
+            // Need to account for player position relative to this enemy (handling wrap)
+            let tx = Game.player.x;
+            let ty = Game.player.y;
+
+            // Adjust tx for wrap if closer wrapped
+            if (tx - this.x > CONFIG.WORLD_WIDTH / 2) tx -= CONFIG.WORLD_WIDTH;
+            if (tx - this.x < -CONFIG.WORLD_WIDTH / 2) tx += CONFIG.WORLD_WIDTH;
+
+            const dx = tx - this.x;
+            const dy = ty - this.y;
+            const dist = Math.sqrt(dx*dx + dy*dy);
+
+            if (dist > 0) {
+                const speed = 6; // Enemy bullet speed (slower than player laser)
+                const vx = (dx / dist) * speed;
+                const vy = (dy / dist) * speed;
+
+                // Spawn bullet
+                const b = new Bullet(this.x, this.y, vx, 'enemy');
+                b.vy = vy; // Bullet class default only uses vx, need to allow vy
+                Game.entities.push(b);
+            }
+        }
     }
 
     draw(ctx) {
@@ -1155,17 +1320,27 @@ class Bullet extends Entity {
         if (this.life <= 0) this.dead = true;
 
         this.x += this.vx * (dt * 60);
+        this.y += this.vy * (dt * 60); // Allow Y movement
 
         if (this.x < 0) this.x += CONFIG.WORLD_WIDTH;
         if (this.x > CONFIG.WORLD_WIDTH) this.x -= CONFIG.WORLD_WIDTH;
     }
 
     draw(ctx) {
-        ctx.fillStyle = CONFIG.COLORS.laser;
-        // Stronger laser glow
-        ctx.shadowColor = CONFIG.COLORS.laser;
-        ctx.shadowBlur = 15;
-        ctx.fillRect(-10, -2, 20, 4);
+        if (this.owner === 'player') {
+            ctx.fillStyle = CONFIG.COLORS.laser;
+            ctx.shadowColor = CONFIG.COLORS.laser;
+            ctx.shadowBlur = 15;
+            ctx.fillRect(-10, -2, 20, 4);
+        } else {
+            // Enemy bullet style
+            ctx.fillStyle = '#ff5555';
+            ctx.shadowColor = '#ff5555';
+            ctx.shadowBlur = 10;
+            ctx.beginPath();
+            ctx.arc(0, 0, 4, 0, Math.PI*2);
+            ctx.fill();
+        }
         ctx.shadowBlur = 0;
     }
 }
