@@ -876,7 +876,7 @@ const Game = {
             while (rx < -100) rx += CONFIG.WORLD_WIDTH;
             while (rx > this.width + 100) rx -= CONFIG.WORLD_WIDTH;
 
-            if (rx > -50 && rx < this.width + 50) {
+            if (rx > -50 && rx < this.width + 50 && !e.dead) {
                  e.takeDamage();
                  count++;
             }
