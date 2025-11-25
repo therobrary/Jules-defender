@@ -630,7 +630,7 @@ const Game = {
         const enemies = this.entities.filter(e => e.type === 'enemy');
         const player = this.player;
 
-        // Bullet vs Enemy / Player
+        // Check bullet collisions: player bullets vs enemies, enemy bullets vs player
         for (let b of bullets) {
             if (b.owner === 'player') {
                 for (let e of enemies) {
