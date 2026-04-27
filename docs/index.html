@@ -3,16 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Robrary Games: Defender</title>
+    <title>Neon Defender | Robrary Games</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap');
-
         :root {
-            --bg-color: #121212;
-            --text-color: #e0e0e0;
+            --bg-color: #0a0a0a;
+            --text-color: #e8e8e8;
             --accent-color: #ffffff;
             --enemy-color: #aaaaaa;
-            --grid-color: #222222;
+            --grid-color: rgba(255, 255, 255, 0.08);
+            --panel-bg: rgba(16, 16, 16, 0.78);
+            --panel-border: rgba(255, 255, 255, 0.12);
+            --danger-color: #ff4444;
         }
 
         body, html {
@@ -22,7 +23,7 @@
             height: 100%;
             background-color: var(--bg-color);
             overflow: hidden;
-            font-family: 'Inter', sans-serif;
+            font-family: 'Courier New', Courier, monospace;
             color: var(--text-color);
             user-select: none;
             -webkit-user-select: none;
@@ -50,53 +51,60 @@
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            background: rgba(18, 18, 18, 0.8);
-            backdrop-filter: blur(5px);
+            background: rgba(10, 10, 10, 0.84);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
             z-index: 10;
             text-align: center;
             transition: opacity 0.5s ease;
         }
 
         h1 {
-            font-size: 4rem;
+            font-size: 3.5rem;
             font-weight: 700;
             margin-bottom: 1rem;
             text-transform: uppercase;
             letter-spacing: 0.2em;
             color: var(--accent-color);
-            text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.35);
             animation: fadeInDown 1s ease-out;
+            font-family: 'Courier New', Courier, monospace;
         }
 
         p {
-            font-size: 1.2rem;
-            margin-bottom: 2rem;
-            opacity: 0.8;
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+            opacity: 0.82;
             color: var(--text-color);
-            text-shadow: 0 0 5px rgba(255, 255, 255, 0.3);
+            text-shadow: 0 0 5px rgba(255, 255, 255, 0.18);
             animation: fadeInUp 1s ease-out 0.5s both;
+            font-family: 'Courier New', Courier, monospace;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
         }
 
         button {
             background: transparent;
-            border: 1px solid var(--text-color);
+            border: 1px solid var(--panel-border);
             color: var(--text-color);
             padding: 15px 30px;
-            font-size: 1.5rem;
-            font-family: 'Inter', sans-serif;
+            font-size: 1rem;
+            font-family: 'Courier New', Courier, monospace;
             text-transform: uppercase;
             cursor: pointer;
             margin-top: 30px;
             border-radius: 4px;
-            text-shadow: 0 0 5px rgba(255, 255, 255, 0.5);
-            box-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
-            transition: all 0.2s;
+            text-shadow: 0 0 5px rgba(255, 255, 255, 0.24);
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.12);
+            transition: all 0.2s ease;
             animation: fadeInUp 1s ease-out 0.8s both;
         }
 
         button:hover {
-            background: var(--text-color);
-            color: var(--bg-color);
+            background: rgba(255, 255, 255, 0.08);
+            color: var(--accent-color);
+            transform: translateY(-2px);
         }
 
         @keyframes fadeInDown {
@@ -127,10 +135,13 @@
             justify-content: space-between;
             padding: 0 20px;
             box-sizing: border-box;
-            font-size: 1.2rem;
-            font-weight: bold;
+            font-size: 0.78rem;
+            font-weight: 700;
             color: var(--text-color);
-            text-shadow: 0 0 5px rgba(255, 255, 255, 0.5);
+            text-shadow: 0 0 5px rgba(255, 255, 255, 0.18);
+            font-family: 'Courier New', Courier, monospace;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
         }
 
         #minimap-container {
@@ -140,8 +151,38 @@
             transform: translateX(-50%);
             width: 40%;
             height: 40px;
-            border: 1px solid var(--grid-color);
-            background: rgba(18, 18, 18, 0.9);
+            border: 1px solid var(--panel-border);
+            background: var(--panel-bg);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border-radius: 3px;
+        }
+
+        #wave-banner {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            opacity: 0;
+            pointer-events: none;
+            z-index: 8;
+            padding: 10px 18px;
+            border: 1px solid var(--panel-border);
+            background: rgba(16, 16, 16, 0.72);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-radius: 4px;
+            font-family: 'Courier New', Courier, monospace;
+            text-transform: uppercase;
+            letter-spacing: 0.2em;
+            font-size: 2rem;
+            color: var(--accent-color);
+            text-shadow: 0 0 12px rgba(255,255,255,0.24);
+            transition: opacity 0.2s ease;
+        }
+
+        #wave-banner.visible {
+            opacity: 1;
         }
 
         #mobile-controls {
@@ -159,7 +200,7 @@
             left: 20px;
             width: 150px;
             height: 150px;
-            background: rgba(255, 255, 255, 0.05);
+            background: rgba(255, 255, 255, 0.04);
             border-radius: 50%;
             border: 1px solid rgba(255, 255, 255, 0.1);
         }
@@ -183,7 +224,7 @@
             height: 100px;
             background: rgba(255, 255, 255, 0.05);
             border-radius: 50%;
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.15);
             display: flex;
             justify-content: center;
             align-items: center;
@@ -207,14 +248,14 @@
         #bomb-btn {
             bottom: 150px;
             right: 40px;
-            border-color: #ff5555;
-            color: #ff5555;
+            border-color: var(--danger-color);
+            color: var(--danger-color);
         }
         #warp-btn {
             bottom: 40px;
             right: 150px;
-            border-color: #00ffff;
-            color: #00ffff;
+            border-color: rgba(255,255,255,0.22);
+            color: rgba(255,255,255,0.72);
         }
 
         .hidden {
@@ -231,38 +272,43 @@
     <div id="ui-layer">
         <div id="hud">
             <div id="score-display">SCORE: 0</div>
-            <div id="lives-display">LIVES: 3 | BOMBS: 3</div>
+            <div id="hiscore-display">HI-SCORE: 0</div>
+            <div id="lives-display">LIVES: 3</div>
+            <div id="ammo-display">AMMO: 3</div>
         </div>
         <div id="minimap-container">
             <canvas id="minimapCanvas"></canvas>
         </div>
+        <div id="wave-banner"></div>
 
         <div id="mobile-controls">
             <div class="d-pad" id="dpad">
                 <div class="d-pad-center"></div>
             </div>
             <div class="fire-btn" id="fireBtn">FIRE</div>
-            <div class="action-btn" id="bomb-btn">BOMB</div>
-            <div class="action-btn" id="warp-btn">WARP</div>
+            <div class="action-btn" id="bomb-btn">AMMO</div>
+            <div class="action-btn" id="warp-btn">HYPER</div>
         </div>
     </div>
 
     <div id="start-screen" class="overlay">
-        <h1>Robrary Games: Defender</h1>
-        <p>ARROWS to Fly | SPACE to Fire</p>
-        <p>B to Bomb | H to Warp</p>
-        <p>Touch: Left stick to Fly | Right buttons to Act</p>
-        <button id="start-btn">INITIATE SYSTEM</button>
+        <h1>NEON DEFENDER</h1>
+        <p>ARROWS TO MOVE | SPACE TO FIRE</p>
+        <p>B TO SMART BOMB | H TO HYPERSPACE</p>
+        <p>DEPLOY TO ENGAGE | TOUCH: LEFT STICK TO MOVE | RIGHT BUTTONS TO ACT</p>
+        <button id="start-btn">INITIATE</button>
     </div>
 
     <div id="game-over-screen" class="overlay hidden">
-        <h1 style="color: #ff5555; text-shadow: 0 0 10px rgba(255, 85, 85, 0.5);">MISSION FAILED</h1>
+        <h1 style="color: var(--danger-color); text-shadow: 0 0 10px rgba(255, 68, 68, 0.35);">MISSION FAILED</h1>
         <p id="final-score">SCORE: 0</p>
+        <p id="final-wave">WAVE: 0</p>
         <button id="restart-btn">REBOOT</button>
     </div>
 
     <div id="pause-screen" class="overlay hidden">
         <h1>PAUSED</h1>
+        <p>SYSTEM HALTED</p>
         <button id="resume-btn">RESUME</button>
         <button id="quit-btn">QUIT</button>
     </div>
@@ -308,6 +354,25 @@ const POWERUPS = {
     SPEED: 'SPEED'
 };
 
+const HighScore = {
+    key: 'neon-defender-high-score',
+    get: function() {
+        try {
+            return parseInt(localStorage.getItem(this.key) || '0', 10) || 0;
+        } catch (e) {
+            return 0;
+        }
+    },
+    set: function(score) {
+        try {
+            const current = this.get();
+            if (score > current) localStorage.setItem(this.key, String(score));
+        } catch (e) {
+            // storage unavailable
+        }
+    }
+};
+
 // --- AUDIO SYSTEM ---
 const AudioSys = {
     ctx: null,
@@ -342,6 +407,11 @@ const AudioSys = {
         gain.connect(this.ctx.destination);
         osc.start();
         osc.stop(this.ctx.currentTime + 0.2);
+    },
+    waveAnnounce: function() {
+        this.playTone(440, 'sine', 0.12, 0.08);
+        setTimeout(() => this.playTone(660, 'sine', 0.12, 0.08), 120);
+        setTimeout(() => this.playTone(880, 'sine', 0.16, 0.08), 240);
     },
     explode: function() {
         // Noise buffer for explosion
@@ -454,6 +524,7 @@ const Game = {
     paused: false,
 
     cameraX: 0,
+    cameraY: 0,
 
     entities: [],
     particles: [],
@@ -535,6 +606,8 @@ const Game = {
         this.smartBombs = 3;
         this.wave = 1;
         this.cameraX = 0;
+        this.cameraY = 0;
+        this.hiScore = HighScore.get();
 
         this.player = new Player(CONFIG.WORLD_WIDTH / 2, this.height / 2);
         this.entities.push(this.player);
@@ -552,6 +625,17 @@ const Game = {
 
         this.spawnWave();
         this.updateHUD();
+        this.showWaveBanner(this.wave);
+    },
+
+    showWaveBanner: function(wave) {
+        const banner = document.getElementById('wave-banner');
+        if (!banner) return;
+        banner.textContent = `WAVE ${wave}`;
+        banner.classList.add('visible');
+        clearTimeout(this.waveBannerTimeout);
+        this.waveBannerTimeout = setTimeout(() => banner.classList.remove('visible'), 1200);
+        AudioSys.waveAnnounce();
     },
 
     spawnWave: function() {
@@ -569,7 +653,11 @@ const Game = {
         this.running = false;
         document.getElementById('game-over-screen').classList.remove('hidden');
         document.getElementById('ui-layer').style.display = 'none';
+        HighScore.set(this.score);
+        this.hiScore = HighScore.get();
         document.getElementById('final-score').textContent = "SCORE: " + this.score;
+        const finalWave = document.getElementById('final-wave');
+        if (finalWave) finalWave.textContent = "WAVE: " + this.wave;
     },
 
     loop: function(now) {
@@ -590,6 +678,7 @@ const Game = {
         const enemies = this.entities.filter(e => e.type === 'enemy');
         if (enemies.length === 0) {
             this.wave++;
+            this.showWaveBanner(this.wave);
             this.spawnWave();
         }
 
@@ -805,7 +894,7 @@ const Game = {
         let camX = ((this.cameraX % CONFIG.WORLD_WIDTH) + CONFIG.WORLD_WIDTH) % CONFIG.WORLD_WIDTH;
         let camW = this.width;
 
-        this.minimapCtx.strokeStyle = '#555';
+        this.minimapCtx.strokeStyle = 'rgba(255,255,255,0.2)';
         this.minimapCtx.strokeRect(camX * scaleX, 0, camW * scaleX, mmH);
         // Handle wrap for frame
         if (camX + camW > CONFIG.WORLD_WIDTH) {
@@ -826,13 +915,9 @@ const Game = {
 
     updateHUD: function() {
         document.getElementById('score-display').innerText = `SCORE: ${this.score}`;
-        let statusText = `LIVES: ${this.lives} | BOMBS: ${this.smartBombs}`;
-
-        if (this.player && this.player.shieldActive) statusText += " | SHIELD";
-        if (this.player && this.player.rapidActive) statusText += " | RAPID";
-        if (this.player && this.player.speedActive) statusText += " | SPEED";
-
-        document.getElementById('lives-display').innerText = statusText;
+        document.getElementById('hiscore-display').innerText = `HI-SCORE: ${this.hiScore}`;
+        document.getElementById('lives-display').innerText = `LIVES: ${this.lives}`;
+        document.getElementById('ammo-display').innerText = `AMMO: ${this.smartBombs}`;
     },
 
     spawnExplosion: function(x, y, color) {
@@ -1276,7 +1361,7 @@ class PowerUp extends Entity {
         super.update(dt);
         // Clamp Y position so power-up stays on screen
         if (this.y < 0) this.y = 0;
-        if (this.y > Game.H) this.y = Game.H;
+        if (this.y > Game.height) this.y = Game.height;
     }
 
     draw(ctx) {
@@ -1294,7 +1379,7 @@ class PowerUp extends Entity {
         ctx.strokeRect(-7, -7, 14, 14);
 
         ctx.fillStyle = color;
-        ctx.font = '10px Inter';
+        ctx.font = '10px Courier New';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
         ctx.fillText(text, 0, 1);
