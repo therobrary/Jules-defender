@@ -6,14 +6,48 @@
     <title>Neon Defender | Robrary Games</title>
     <style>
         :root {
+            /* Core palette — Neon Noir: grayscale foundation + restrained cyan accent */
+            --bg-deep: #050505;
+            --bg-field: #0a0a0a;
+            --bg-skyline: #111111;
+            --text-primary: #e8e8e8;
+            --text-dim: #888888;
+            --text-danger: #cc4444;
+            --accent: #00e5ff;
+            --accent-glow: rgba(0, 229, 255, 0.35);
+            --accent-pulse: rgba(0, 229, 255, 0.12);
+
+            /* Glassmorphism */
+            --glass-bg: rgba(255, 255, 255, 0.04);
+            --glass-border: rgba(255, 255, 255, 0.10);
+            --glass-highlight: rgba(255, 255, 255, 0.16);
+            --glass-blur: 12px;
+
+            /* Existing tokens (kept for compatibility) */
             --bg-color: #0a0a0a;
             --text-color: #e8e8e8;
-            --accent-color: #ffffff;
+            --accent-color: #00e5ff;       /* was #ffffff; now the cyan accent */
             --enemy-color: #aaaaaa;
             --grid-color: rgba(255, 255, 255, 0.08);
-            --panel-bg: rgba(16, 16, 16, 0.78);
+            --panel-bg: rgba(10, 10, 10, 0.78);
             --panel-border: rgba(255, 255, 255, 0.12);
             --danger-color: #ff4444;
+
+            /* Geometry */
+            --border-radius: 4px;
+            --glow-soft: 0 0 15px rgba(255, 255, 255, 0.15);
+            --glow-accent: 0 0 15px var(--accent-glow);
+
+            /* Motion */
+            --motion-fast: 0.15s;
+            --motion-normal: 0.3s;
+            --motion-slow: 0.6s;
+
+            /* Typography */
+            --font-mono: 'Courier New', Courier, monospace;
+
+            /* Game tuning */
+            --max-shake: 20;              /* capped for mobile coarse-pointer devices */
         }
 
         body, html {
@@ -51,25 +85,103 @@
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            background: rgba(10, 10, 10, 0.84);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border-top: 1px solid rgba(255, 255, 255, 0.08);
+            background: rgba(5, 5, 5, 0.82);
+            backdrop-filter: blur(var(--glass-blur));
+            -webkit-backdrop-filter: blur(var(--glass-blur));
+            border-top: 1px solid var(--glass-border);
             z-index: 10;
             text-align: center;
-            transition: opacity 0.5s ease;
+            transition: opacity var(--motion-slow) ease;
+        }
+
+        .overlay-card {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--border-radius);
+            padding: 36px 44px;
+            max-width: 480px;
+            width: 90%;
+            text-align: center;
+            box-shadow: var(--glow-soft), inset 0 1px 0 var(--glass-highlight);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            animation: fadeInUp var(--motion-normal) ease-out;
+        }
+
+        .overlay-card h1 {
+            margin-bottom: 0.5rem;
+        }
+
+        .overlay-card .subtitle {
+            font-size: 0.65rem;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            color: var(--text-dim);
+            margin-bottom: 1.2rem;
+        }
+
+        .overlay-card p {
+            margin-bottom: 1rem;
+            font-size: 0.75rem;
+            line-height: 1.7;
+            color: var(--text-dim);
+            text-align: center;
+            text-transform: none;
+            letter-spacing: 1px;
+            text-shadow: none;
+            animation: none;
+        }
+
+        .overlay-card .controls-grid {
+            display: grid;
+            grid-template-columns: auto 1fr;
+            gap: 6px 14px;
+            margin: 1.2rem 0;
+            font-size: 0.7rem;
+            text-align: left;
+        }
+
+        .overlay-card .controls-grid .key {
+            color: var(--accent);
+            font-weight: 700;
+            letter-spacing: 1px;
+        }
+
+        .overlay-card .controls-grid .desc {
+            color: var(--text-dim);
+        }
+
+        .overlay-card .actions {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 1.5rem;
+        }
+
+        .overlay-card h1 {
+            animation: fadeInDown 1s ease-out;
         }
 
         h1 {
-            font-size: 3.5rem;
-            font-weight: 700;
+            font-size: 2.4rem;
+            font-weight: 300;
             margin-bottom: 1rem;
             text-transform: uppercase;
-            letter-spacing: 0.2em;
-            color: var(--accent-color);
-            text-shadow: 0 0 10px rgba(255, 255, 255, 0.35);
-            animation: fadeInDown 1s ease-out;
-            font-family: 'Courier New', Courier, monospace;
+            letter-spacing: 6px;
+            color: var(--text-primary);
+            text-shadow: 0 0 20px rgba(255,255,255,0.3);
+            font-family: var(--font-mono);
+        }
+
+        h1.title-accent {
+            color: var(--accent);
+            text-shadow: 0 0 20px var(--accent-glow);
+        }
+
+        h1.title-danger {
+            color: var(--text-danger);
+            text-shadow: 0 0 20px rgba(204, 68, 68, 0.4);
         }
 
         p {
@@ -85,26 +197,46 @@
         }
 
         button {
-            background: transparent;
-            border: 1px solid var(--panel-border);
-            color: var(--text-color);
-            padding: 15px 30px;
-            font-size: 1rem;
-            font-family: 'Courier New', Courier, monospace;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            color: var(--text-primary);
+            padding: 14px 32px;
+            font-size: 0.85rem;
+            font-weight: 400;
+            font-family: var(--font-mono);
             text-transform: uppercase;
+            letter-spacing: 4px;
             cursor: pointer;
-            margin-top: 30px;
-            border-radius: 4px;
-            text-shadow: 0 0 5px rgba(255, 255, 255, 0.24);
-            box-shadow: 0 0 10px rgba(255, 255, 255, 0.12);
-            transition: all 0.2s ease;
-            animation: fadeInUp 1s ease-out 0.8s both;
+            margin-top: 0;
+            border-radius: var(--border-radius);
+            text-shadow: 0 0 5px rgba(255, 255, 255, 0.18);
+            box-shadow: 0 0 10px rgba(0,0,0,0.4);
+            transition: all var(--motion-normal) ease;
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
         }
 
         button:hover {
             background: rgba(255, 255, 255, 0.08);
-            color: var(--accent-color);
+            border-color: var(--glass-highlight);
+            color: var(--accent);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.5), var(--glow-soft);
             transform: translateY(-2px);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        button.primary {
+            border-color: var(--accent);
+            color: var(--accent);
+            box-shadow: 0 0 10px rgba(0,0,0,0.4), var(--glow-accent);
+        }
+
+        button.primary:hover {
+            background: var(--accent-pulse);
+            box-shadow: 0 4px 25px rgba(0,0,0,0.5), var(--glow-accent);
         }
 
         @keyframes fadeInDown {
@@ -129,33 +261,75 @@
 
         #hud {
             position: absolute;
-            top: 20px;
-            width: 100%;
+            top: 16px;
+            left: 16px;
+            right: 16px;
             display: flex;
             justify-content: space-between;
-            padding: 0 20px;
-            box-sizing: border-box;
-            font-size: 0.78rem;
-            font-weight: 700;
-            color: var(--text-color);
-            text-shadow: 0 0 5px rgba(255, 255, 255, 0.18);
-            font-family: 'Courier New', Courier, monospace;
+            align-items: flex-start;
+            gap: 12px;
+            font-size: 0.7rem;
+            font-weight: 400;
+            color: var(--text-dim);
+            font-family: var(--font-mono);
             text-transform: uppercase;
-            letter-spacing: 0.12em;
+            letter-spacing: 2px;
+            pointer-events: none;
+            z-index: 11;
+        }
+
+        .hud-cluster {
+            display: flex;
+            gap: 10px;
+        }
+
+        .hud-item {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--border-radius);
+            padding: 8px 12px;
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 2px;
+            min-width: 70px;
+        }
+
+        .hud-item .label {
+            font-size: 0.55rem;
+            opacity: 0.6;
+            letter-spacing: 3px;
+        }
+
+        .hud-item .value {
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            text-shadow: 0 0 8px rgba(255,255,255,0.18);
+            letter-spacing: 1px;
+        }
+
+        .hud-item.accent .value {
+            color: var(--accent);
+            text-shadow: 0 0 10px var(--accent-glow);
         }
 
         #minimap-container {
             position: absolute;
-            top: 60px;
+            top: 76px;
             left: 50%;
             transform: translateX(-50%);
-            width: 40%;
-            height: 40px;
-            border: 1px solid var(--panel-border);
-            background: var(--panel-bg);
-            backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px);
-            border-radius: 3px;
+            width: min(40%, 520px);
+            height: 44px;
+            border: 1px solid var(--glass-border);
+            background: var(--glass-bg);
+            backdrop-filter: blur(var(--glass-blur));
+            -webkit-backdrop-filter: blur(var(--glass-blur));
+            border-radius: var(--border-radius);
+            box-shadow: var(--glow-soft);
+            z-index: 11;
         }
 
         #wave-banner {
@@ -166,19 +340,21 @@
             opacity: 0;
             pointer-events: none;
             z-index: 8;
-            padding: 10px 18px;
-            border: 1px solid var(--panel-border);
-            background: rgba(16, 16, 16, 0.72);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border-radius: 4px;
-            font-family: 'Courier New', Courier, monospace;
+            padding: 12px 24px;
+            border: 1px solid var(--glass-border);
+            background: var(--glass-bg);
+            backdrop-filter: blur(var(--glass-blur));
+            -webkit-backdrop-filter: blur(var(--glass-blur));
+            border-radius: var(--border-radius);
+            font-family: var(--font-mono);
             text-transform: uppercase;
-            letter-spacing: 0.2em;
-            font-size: 2rem;
-            color: var(--accent-color);
-            text-shadow: 0 0 12px rgba(255,255,255,0.24);
-            transition: opacity 0.2s ease;
+            letter-spacing: 8px;
+            font-size: 2.4rem;
+            font-weight: 300;
+            color: var(--text-primary);
+            text-shadow: 0 0 24px rgba(255,255,255,0.35);
+            box-shadow: var(--glow-soft), inset 0 1px 0 var(--glass-highlight);
+            transition: opacity var(--motion-normal) ease;
         }
 
         #wave-banner.visible {
@@ -200,9 +376,12 @@
             left: 20px;
             width: 150px;
             height: 150px;
-            background: rgba(255, 255, 255, 0.04);
+            background: var(--glass-bg);
             border-radius: 50%;
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            border: 1px solid var(--glass-border);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            touch-action: none;
         }
 
         .d-pad-center {
@@ -222,40 +401,49 @@
             right: 40px;
             width: 100px;
             height: 100px;
-            background: rgba(255, 255, 255, 0.05);
+            background: var(--glass-bg);
             border-radius: 50%;
-            border: 1px solid rgba(255, 255, 255, 0.15);
+            border: 1px solid var(--glass-highlight);
             display: flex;
             justify-content: center;
             align-items: center;
             font-size: 1.2rem;
-            color: rgba(255, 255, 255, 0.8);
+            color: var(--accent);
+            text-shadow: 0 0 12px var(--accent-glow);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            touch-action: none;
         }
 
         .action-btn {
             position: absolute;
             width: 70px;
             height: 70px;
-            background: rgba(255, 255, 255, 0.05);
+            background: var(--glass-bg);
             border-radius: 50%;
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            border: 1px solid var(--glass-highlight);
             display: flex;
             justify-content: center;
             align-items: center;
             font-size: 0.9rem;
-            color: rgba(255, 255, 255, 0.8);
+            color: var(--text-primary);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            touch-action: none;
         }
         #bomb-btn {
             bottom: 150px;
             right: 40px;
-            border-color: var(--danger-color);
-            color: var(--danger-color);
+            border-color: var(--text-danger);
+            color: var(--text-danger);
+            text-shadow: 0 0 10px rgba(204, 68, 68, 0.4);
         }
         #warp-btn {
             bottom: 40px;
             right: 150px;
-            border-color: rgba(255,255,255,0.22);
-            color: rgba(255,255,255,0.72);
+            border-color: var(--accent);
+            color: var(--accent);
+            text-shadow: 0 0 10px var(--accent-glow);
         }
 
         .hidden {
@@ -271,10 +459,30 @@
 
     <div id="ui-layer">
         <div id="hud">
-            <div id="score-display">SCORE: 0</div>
-            <div id="hiscore-display">HI-SCORE: 0</div>
-            <div id="lives-display">LIVES: 3</div>
-            <div id="ammo-display">AMMO: 3</div>
+            <div class="hud-cluster">
+                <div class="hud-item accent">
+                    <div class="label">SCORE</div>
+                    <div class="value" id="score-display">0</div>
+                </div>
+                <div class="hud-item">
+                    <div class="label">HI-SCORE</div>
+                    <div class="value" id="hiscore-display">0</div>
+                </div>
+            </div>
+            <div class="hud-cluster">
+                <div class="hud-item">
+                    <div class="label">WAVE</div>
+                    <div class="value" id="wave-display">1</div>
+                </div>
+                <div class="hud-item accent">
+                    <div class="label">AMMO</div>
+                    <div class="value" id="ammo-display">3</div>
+                </div>
+                <div class="hud-item">
+                    <div class="label">LIVES</div>
+                    <div class="value" id="lives-display">3</div>
+                </div>
+            </div>
         </div>
         <div id="minimap-container">
             <canvas id="minimapCanvas"></canvas>
@@ -292,25 +500,48 @@
     </div>
 
     <div id="start-screen" class="overlay">
-        <h1>NEON DEFENDER</h1>
-        <p>ARROWS TO MOVE | SPACE TO FIRE</p>
-        <p>B TO SMART BOMB | H TO HYPERSPACE</p>
-        <p>DEPLOY TO ENGAGE | TOUCH: LEFT STICK TO MOVE | RIGHT BUTTONS TO ACT</p>
-        <button id="start-btn">INITIATE</button>
+        <div class="overlay-card">
+            <h1 class="title-accent">NEON DEFENDER</h1>
+            <div class="subtitle">SECTOR DEFENSE // TERMINAL 01</div>
+            <p>Defend your sector from the alien Landers. Destroy all enemies to advance. Don't crash.</p>
+            <div class="controls-grid">
+                <div class="key">ARROWS</div><div class="desc">Move / thrust</div>
+                <div class="key">SPACE</div><div class="desc">Fire lasers</div>
+                <div class="key">B</div><div class="desc">Smart bomb</div>
+                <div class="key">H</div><div class="desc">Hyperspace (10% risk)</div>
+                <div class="key">ESC</div><div class="desc">Pause</div>
+            </div>
+            <p style="font-size: 0.6rem; opacity: 0.55; margin-top: 1rem;">
+                TOUCH: LEFT STICK TO MOVE | RIGHT BUTTONS TO ACT
+            </p>
+            <div class="actions">
+                <button id="start-btn" class="primary">INITIATE</button>
+            </div>
+        </div>
     </div>
 
     <div id="game-over-screen" class="overlay hidden">
-        <h1 style="color: var(--danger-color); text-shadow: 0 0 10px rgba(255, 68, 68, 0.35);">MISSION FAILED</h1>
-        <p id="final-score">SCORE: 0</p>
-        <p id="final-wave">WAVE: 0</p>
-        <button id="restart-btn">REBOOT</button>
+        <div class="overlay-card">
+            <h1 class="title-danger">MISSION FAILED</h1>
+            <div class="subtitle">TERMINAL LINK SEVERED</div>
+            <p id="final-score">SCORE: 0</p>
+            <p id="final-wave">WAVE: 0</p>
+            <div class="actions">
+                <button id="restart-btn" class="primary">REBOOT</button>
+            </div>
+        </div>
     </div>
 
     <div id="pause-screen" class="overlay hidden">
-        <h1>PAUSED</h1>
-        <p>SYSTEM HALTED</p>
-        <button id="resume-btn">RESUME</button>
-        <button id="quit-btn">QUIT</button>
+        <div class="overlay-card">
+            <h1>PAUSED</h1>
+            <div class="subtitle">SYSTEM HALTED</div>
+            <p>Press ESC or click RESUME to continue.</p>
+            <div class="actions">
+                <button id="resume-btn" class="primary">RESUME</button>
+                <button id="quit-btn">QUIT</button>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -334,17 +565,19 @@ const CONFIG = {
     SPAWN_RATE: 100, // Frames between spawns
     POWERUP_CHANCE: 0.2, // 20% chance
     COLORS: {
-        bg: '#121212',
-        player: '#ffffff',
-        enemy: '#aaaaaa',
-        laser: '#e0e0e0',
+        bg: '#050505',                     // matches --bg-deep
+        player: '#e8e8e8',                 // matches --text-primary
+        enemy: '#aaaaaa',                  // grayscale, no accent
+        laser: '#e8e8e8',
         particle: '#dddddd',
-        minimap_player: '#ffffff',
-        minimap_enemy: '#ff5555',
-        grid: '#222222',
-        shield: '#00ffff',
-        rapid: '#ffff00',
-        speed: '#00ff00'
+        minimap_player: '#00e5ff',         // matches --accent (cyan dot for self)
+        minimap_enemy: '#aaaaaa',          // grayscale enemy dot
+        minimap_frame: 'rgba(255,255,255,0.18)',
+        grid: 'rgba(255, 255, 255, 0.06)',
+        shield: '#00e5ff',                 // --accent
+        rapid: '#ffff00',                  // warning yellow (limited use)
+        speed: '#00ff00',                  // status green (limited use)
+        terrain: '#222222'                 // matches --bg-skyline
     }
 };
 
@@ -353,6 +586,41 @@ const POWERUPS = {
     RAPID: 'RAPID',
     SPEED: 'SPEED'
 };
+
+// Modular world-wrap helper. Maps relX = (entity.x - cameraX) to the unique
+// equivalent offset that lies in (-screenW/2, screenW/2] relative to the
+// screen midpoint — i.e. the on-screen / closest-wrap copy of the entity.
+// Avoids the original `while` loop's single-shift overflow bug.
+function wrapScreenX(relX, screenW) {
+    const W = CONFIG.WORLD_WIDTH;
+    return ((relX - screenW / 2 + W / 2) % W + W) % W - W / 2 + screenW / 2;
+}
+
+// --- OBJECT POOL ---
+// Pre-allocates entities (Particle, Bullet, Explosion) to avoid GC stutter
+// during heavy events (smart bomb, big explosions). Mirrors the pool pattern
+// from ../jules-missiledefense-game/docs/index.html.
+class Pool {
+    constructor(factory, prewarm = 0) {
+        this.factory = factory;
+        this.free = [];
+        this.active = new Set();
+        for (let i = 0; i < prewarm; i++) this.free.push(factory());
+    }
+    acquire() {
+        const obj = this.free.pop() || this.factory();
+        this.active.add(obj);
+        return obj;
+    }
+    release(obj) {
+        if (this.active.delete(obj)) this.free.push(obj);
+    }
+    get activeCount() { return this.active.size; }
+    reset() {
+        this.free.length = 0;
+        this.active.clear();
+    }
+}
 
 const HighScore = {
     key: 'neon-defender-high-score',
@@ -543,6 +811,11 @@ const Game = {
         this.resize();
         window.addEventListener('resize', () => this.resize());
 
+        // Object pools — pre-warm to avoid first-frame allocation stalls.
+        this.particlePool = new Pool(() => new Particle(0, 0, '#ffffff'), 200);
+        this.bulletPool = new Pool(() => new Bullet(0, 0, 0, 'player'), 50);
+        this.explosionPool = new Pool(() => new Explosion(0, 0, false), 30);
+
         Input.init();
 
         document.getElementById('start-btn').addEventListener('click', () => this.start());
@@ -574,6 +847,14 @@ const Game = {
         this.running = true;
         this.paused = false;
         this.lastTime = performance.now();
+
+        // Screen shake state. Capped lower on mobile coarse-pointer devices
+        // to keep gameplay legible through the vibration.
+        this.shakeStrength = 0;
+        this.maxShake = (window.matchMedia && window.matchMedia('(pointer: coarse)').matches)
+            ? parseInt(getComputedStyle(document.documentElement).getPropertyValue('--max-shake')) || 20
+            : 30;
+
         requestAnimationFrame(t => this.loop(t));
     },
 
@@ -586,7 +867,9 @@ const Game = {
         } else {
             pauseScreen.classList.add('hidden');
             this.lastTime = performance.now(); // Prevent dt jump
-            requestAnimationFrame(t => this.loop(t));
+            // Guard: only resume the loop if the game is still running
+            // (quitGame / gameOver may have flipped running off while paused).
+            if (this.running) requestAnimationFrame(t => this.loop(t));
         }
     },
 
@@ -599,8 +882,19 @@ const Game = {
     },
 
     resetGame: function() {
+        // Release any pooled entities still active from a previous run
+        if (this.bulletPool) {
+            for (const b of [...this.bulletPool.active]) this.bulletPool.release(b);
+        }
+        if (this.particlePool) {
+            for (const p of [...this.particlePool.active]) this.particlePool.release(p);
+        }
+        if (this.explosionPool) {
+            for (const x of [...this.explosionPool.active]) this.explosionPool.release(x);
+        }
         this.entities = [];
         this.particles = [];
+        this.explosions = [];
         this.score = 0;
         this.lives = 3;
         this.smartBombs = 3;
@@ -682,13 +976,45 @@ const Game = {
             this.spawnWave();
         }
 
+        // Input Fire (Debounce handled in Player) — moved before entity updates
+        // so a freshly-pressed fire key on a slow frame still spawns a bullet this tick.
+        if ((Input.keys['Space'] || Input.touch.fire) && this.player.canFire()) {
+            this.player.fire();
+        }
+
         // Update Entities
         this.entities.forEach(e => e.update(dt));
         this.particles.forEach(p => p.update(dt));
+        this.explosions.forEach(e => e.update(dt));
 
-        // Remove dead
-        this.entities = this.entities.filter(e => !e.dead);
-        this.particles = this.particles.filter(p => p.life > 0);
+        // Remove dead — and release pooled entities back to their pools
+        this.entities = this.entities.filter(e => {
+            if (e.dead) {
+                if (e.type === 'bullet' && this.bulletPool) this.bulletPool.release(e);
+                return false;
+            }
+            return true;
+        });
+        this.particles = this.particles.filter(p => {
+            if (p.life <= 0) {
+                if (this.particlePool) this.particlePool.release(p);
+                return false;
+            }
+            return true;
+        });
+        this.explosions = this.explosions.filter(e => {
+            if (e.done) {
+                if (this.explosionPool) this.explosionPool.release(e);
+                return false;
+            }
+            return true;
+        });
+
+        // Decay screen shake — exponential fade so a single large event
+        // tapers in ~0.5s without snapping.
+        if (this.shakeStrength && this.shakeStrength > 0) {
+            this.shakeStrength = Math.max(0, this.shakeStrength * Math.pow(0.06, dt));
+        }
 
         // Camera Follow Player
         // Center player on screen
@@ -707,11 +1033,6 @@ const Game = {
 
         // Check Powerups
         this.checkPowerups();
-
-        // Input Fire (Debounce handled in Player)
-        if ((Input.keys['Space'] || Input.touch.fire) && this.player.canFire()) {
-            this.player.fire();
-        }
     },
 
     checkCollisions: function() {
@@ -750,6 +1071,7 @@ const Game = {
                     } else {
                         player.die();
                         e.takeDamage(); // ramming kills enemy too?
+                        break; // Only one death per frame even if multiple enemies overlap
                     }
                 }
             }
@@ -771,19 +1093,14 @@ const Game = {
     },
 
     checkRectOverlap: function(a, b) {
-        // Simple AABB, but handle world wrapping?
-        // Since we move entities, local coords should be close.
-        // If entities are far apart due to wrapping, this check fails, which is correct.
-        // Wait, visually they might overlap if one is wrapped.
-        // We should check normal, +World, -World relative positions.
-        // For simplicity in this clone, we rely on the fact that entities are moved
-        // into 0..WORLD_WIDTH range every frame.
-        // So we just check |dx| < width.
-
+        // AABB with world-wrap awareness. Both a.x and b.x are kept in [0, WORLD_WIDTH)
+        // by Entity.update / Bullet.update, so dx is the straight difference; if it
+        // exceeds half the world, the short-arc distance is W - dx.
+        const W = CONFIG.WORLD_WIDTH;
         let dx = Math.abs(a.x - b.x);
-        let dy = Math.abs(a.y - b.y);
+        const dy = Math.abs(a.y - b.y);
 
-        if (dx > CONFIG.WORLD_WIDTH / 2) dx = CONFIG.WORLD_WIDTH - dx; // wrapped distance
+        if (dx > W / 2) dx = W - dx; // wrapped distance
 
         return (dx < (a.w/2 + b.w/2) && dy < (a.h/2 + b.h/2));
     },
@@ -794,6 +1111,15 @@ const Game = {
         this.ctx.fillRect(0, 0, this.width, this.height);
 
         this.ctx.save();
+        // Screen shake — apply AFTER camera transform is set, so it offsets
+        // both the world layer and (via the saved state) restores cleanly.
+        const shake = this.shakeStrength || 0;
+        if (shake > 0.1) {
+            this.ctx.translate(
+                (Math.random() - 0.5) * shake,
+                (Math.random() - 0.5) * shake
+            );
+        }
 
         // Draw Grid Background (moves with world camera)
         // Let's make a static grid relative to world
@@ -825,7 +1151,7 @@ const Game = {
 
 
         // Draw Stars (Subtle in background)
-        this.ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
+        this.ctx.fillStyle = 'rgba(255, 255, 255, 0.18)';
         this.stars.forEach(s => {
             // Parallax x relative to camera
             let x = s.x - this.cameraX * 0.5;
@@ -836,11 +1162,11 @@ const Game = {
         });
 
         // Draw Terrain Line
-        this.ctx.strokeStyle = '#333';
+        this.ctx.strokeStyle = 'rgba(255, 255, 255, 0.12)';
         this.ctx.lineWidth = 2;
         this.ctx.shadowBlur = 0;
         this.ctx.beginPath();
-        // Simple line at bottom
+        // Subtle terrain line at bottom
         let groundY = this.height - 20;
         this.ctx.moveTo(0, groundY);
         this.ctx.lineTo(this.width, groundY);
@@ -848,12 +1174,8 @@ const Game = {
 
         // Draw Entities
         this.entities.forEach(e => {
-            // Draw relative to camera
-            let rx = e.x - this.cameraX;
-            // Wrap rx to be near screen
-            let drawnX = rx;
-            while (drawnX < -100) drawnX += CONFIG.WORLD_WIDTH;
-            while (drawnX > this.width + 100) drawnX -= CONFIG.WORLD_WIDTH;
+            // Draw relative to camera, picking the on-screen instance via shortest-arc wrap.
+            const drawnX = wrapScreenX(e.x - this.cameraX, this.width);
 
             this.ctx.save();
             this.ctx.translate(drawnX, e.y);
@@ -863,13 +1185,23 @@ const Game = {
 
         // Draw Particles
         this.particles.forEach(p => {
-            let rx = p.x - this.cameraX;
-            while (rx < -100) rx += CONFIG.WORLD_WIDTH;
-            while (rx > this.width + 100) rx -= CONFIG.WORLD_WIDTH;
+            const rx = wrapScreenX(p.x - this.cameraX, this.width);
 
             this.ctx.save();
             this.ctx.translate(rx, p.y);
             p.draw(this.ctx);
+            this.ctx.restore();
+        });
+
+        // Draw Explosions (drawn after particles so the ring sits on top)
+        this.explosions.forEach(e => {
+            const rx = wrapScreenX(e.x - this.cameraX, this.width);
+            // Skip the rare draw where the explosion lives on the far wrap copy
+            // and is far outside the canvas — saves a save/restore pair.
+            if (rx < -200 || rx > this.width + 200) return;
+            this.ctx.save();
+            this.ctx.translate(rx, e.y);
+            e.draw(this.ctx);
             this.ctx.restore();
         });
 
@@ -894,7 +1226,7 @@ const Game = {
         let camX = ((this.cameraX % CONFIG.WORLD_WIDTH) + CONFIG.WORLD_WIDTH) % CONFIG.WORLD_WIDTH;
         let camW = this.width;
 
-        this.minimapCtx.strokeStyle = 'rgba(255,255,255,0.2)';
+        this.minimapCtx.strokeStyle = CONFIG.COLORS.minimap_frame;
         this.minimapCtx.strokeRect(camX * scaleX, 0, camW * scaleX, mmH);
         // Handle wrap for frame
         if (camX + camW > CONFIG.WORLD_WIDTH) {
@@ -909,21 +1241,40 @@ const Game = {
             else if (e.type === 'enemy') this.minimapCtx.fillStyle = CONFIG.COLORS.minimap_enemy;
             else return;
 
-            this.minimapCtx.fillRect(mx, my, 2, 2);
+            // Subtle drop-shadow for self dot, plain dots for enemies
+            if (e.type === 'player') {
+                this.minimapCtx.shadowColor = CONFIG.COLORS.minimap_player;
+                this.minimapCtx.shadowBlur = 4;
+                this.minimapCtx.fillRect(mx - 1, my - 1, 4, 4);
+                this.minimapCtx.shadowBlur = 0;
+            } else {
+                this.minimapCtx.fillRect(mx, my, 2, 2);
+            }
         });
     },
 
     updateHUD: function() {
-        document.getElementById('score-display').innerText = `SCORE: ${this.score}`;
-        document.getElementById('hiscore-display').innerText = `HI-SCORE: ${this.hiScore}`;
-        document.getElementById('lives-display').innerText = `LIVES: ${this.lives}`;
-        document.getElementById('ammo-display').innerText = `AMMO: ${this.smartBombs}`;
+        document.getElementById('score-display').innerText = this.score;
+        document.getElementById('hiscore-display').innerText = this.hiScore;
+        document.getElementById('lives-display').innerText = this.lives;
+        document.getElementById('ammo-display').innerText = this.smartBombs;
+        if (document.getElementById('wave-display')) {
+            document.getElementById('wave-display').innerText = this.wave;
+        }
     },
 
-    spawnExplosion: function(x, y, color) {
+    spawnExplosion: function(x, y, color, isFlak = false) {
         AudioSys.explode();
-        for(let i=0; i<10; i++) {
-            this.particles.push(new Particle(x, y, color));
+        // Big expanding-ring explosion (or small flak pop)
+        const e = this.explosionPool.acquire();
+        e.init(x, y, isFlak);
+        this.explosions.push(e);
+        // Particle burst (existing behaviour preserved)
+        const count = isFlak ? 4 : 10;
+        for (let i = 0; i < count; i++) {
+            const p = this.particlePool.acquire();
+            p.init(x, y, color);
+            this.particles.push(p);
         }
     },
 
@@ -952,21 +1303,30 @@ const Game = {
             setTimeout(() => flash.remove(), 500);
         }, 50);
 
+        // Big screen shake — the bomb hits the whole viewport
+        this.shake(20);
+
         // Kill all enemies on screen
         const enemies = this.entities.filter(e => e.type === 'enemy');
         let count = 0;
         enemies.forEach(e => {
-            // Check if on screen (similar logic to Lander.fire)
-            let rx = e.x - this.cameraX;
-            while (rx < -100) rx += CONFIG.WORLD_WIDTH;
-            while (rx > this.width + 100) rx -= CONFIG.WORLD_WIDTH;
+            // Check if on screen (shortest-arc wrap)
+            const rx = wrapScreenX(e.x - this.cameraX, this.width);
 
             if (rx > -50 && rx < this.width + 50 && !e.dead) {
                  e.takeDamage();
+                 // Per-kill visual explosion at the bomb site
+                 this.spawnExplosion(e.x, e.y, CONFIG.COLORS.enemy);
                  count++;
             }
         });
-    }
+    },
+
+    // Adds intensity to the screen shake. Capped at maxShake so a long sequence
+    // of damage events cannot turn the screen into a blur.
+    shake: function(amount) {
+        this.shakeStrength = Math.min(this.maxShake, (this.shakeStrength || 0) + amount);
+    },
 };
 
 // --- ENTITIES ---
@@ -997,9 +1357,8 @@ class Entity {
 
         this.y += this.vy;
 
-        // Wrap World
-        if (this.x < 0) this.x += CONFIG.WORLD_WIDTH;
-        if (this.x > CONFIG.WORLD_WIDTH) this.x -= CONFIG.WORLD_WIDTH;
+        // Wrap World (modular: handles any single-frame overshoot)
+        this.x = ((this.x % CONFIG.WORLD_WIDTH) + CONFIG.WORLD_WIDTH) % CONFIG.WORLD_WIDTH;
     }
 
     draw(ctx) {}
@@ -1022,6 +1381,11 @@ class Player extends Entity {
 
         this.rapidTimer = 0;
         this.speedTimer = 0;
+        this.invulTimeoutId = null;
+        this._respawnTimeoutId = null;
+
+        // Thrust trail — drops particles when input says we're thrusting
+        this.thrustTrail = [];
     }
 
     update(dt) {
@@ -1087,6 +1451,19 @@ class Player extends Entity {
         if (this.y > Game.height - 50) this.y = Game.height - 50;
 
         super.update(dt);
+
+        // Thrust trail — drop a particle each frame while thrusting along the facing axis
+        const thrusting = (this.facingRight && inputX > 0) || (!this.facingRight && inputX < 0);
+        if (thrusting && Math.random() < 0.7) {
+            this.thrustTrail.push({
+                ox: this.facingRight ? -16 : 16,
+                oy: (Math.random() - 0.5) * 6,
+                age: 0
+            });
+        }
+        for (const t of this.thrustTrail) t.age += dt;
+        // Cull at 0.5s lifetime
+        this.thrustTrail = this.thrustTrail.filter(t => t.age < 0.5);
     }
 
     draw(ctx) {
@@ -1125,17 +1502,15 @@ class Player extends Entity {
         }
         ctx.stroke();
 
-        // Engine flame (simple line, less "fire")
-        ctx.beginPath();
-        ctx.strokeStyle = '#ccc';
-        if (this.facingRight && Math.random() > 0.5) {
-            ctx.moveTo(-15, 0);
-            ctx.lineTo(-25, 0);
-        } else if (!this.facingRight && Math.random() > 0.5) {
-            ctx.moveTo(15, 0);
-            ctx.lineTo(25, 0);
+        // Thrust trail (drawn first so the body sits on top)
+        for (const t of this.thrustTrail) {
+            const a = Math.max(0, 1 - t.age / 0.5) * 0.55;
+            ctx.fillStyle = `rgba(232, 232, 232, ${a.toFixed(3)})`;
+            ctx.shadowColor = '#ffffff';
+            ctx.shadowBlur = 6;
+            ctx.fillRect(t.ox - 2, t.oy - 1, 4, 2);
         }
-        ctx.stroke();
+        ctx.shadowBlur = 0;
 
         ctx.shadowBlur = 0;
     }
@@ -1160,11 +1535,19 @@ class Player extends Entity {
         // Usually constant high speed + player velocity fraction.
         const bvx = (dir * CONFIG.LASER_SPEED) + (this.vx * 0.5);
 
-        Game.entities.push(new Bullet(bx, this.y, bvx, 'player'));
+        const b = Game.bulletPool.acquire();
+        b.init(bx, this.y, bvx, 'player');
+        Game.entities.push(b);
     }
 
     die() {
+        // Cancel any pending respawn/invulnerability timer from a prior death
+        if (this._respawnTimeoutId !== null) {
+            clearTimeout(this._respawnTimeoutId);
+            this._respawnTimeoutId = null;
+        }
         Game.spawnExplosion(this.x, this.y, CONFIG.COLORS.player);
+        Game.shake(15);  // Big shake on player death
         Game.lives--;
 
         // Reset powerups on death
@@ -1182,7 +1565,10 @@ class Player extends Entity {
             this.vx = 0;
             this.vy = 0;
             this.invulnerable = true;
-            setTimeout(() => { this.invulnerable = false; }, 2000);
+            this._respawnTimeoutId = setTimeout(() => {
+                this.invulnerable = false;
+                this._respawnTimeoutId = null;
+            }, 2000);
         }
     }
 
@@ -1218,7 +1604,7 @@ class Player extends Entity {
         if (this.dead) return;
 
         // Visual vanish effect at old pos
-        Game.spawnExplosion(this.x, this.y, '#00ffff');
+        Game.spawnExplosion(this.x, this.y, '#00ffff', true);
         AudioSys.playTone(800, 'triangle', 0.5, 0.3);
 
         // Randomize Position
@@ -1231,11 +1617,12 @@ class Player extends Entity {
         if (Math.random() < 0.10) {
             setTimeout(() => {
                 console.log("Hyperspace Malfunction");
+                Game.shake(8);
                 if (!this.dead) this.die();
             }, 200);
         } else {
             // Visual appear effect
-            Game.spawnExplosion(this.x, this.y, '#ffffff');
+            Game.spawnExplosion(this.x, this.y, '#ffffff', true);
         }
     }
 }
@@ -1249,6 +1636,7 @@ class Lander extends Entity {
         this.timer = Math.random() * 100;
         this.vx = (Math.random() - 0.5) * 2; // Drift
         this.fireTimer = Math.random() * 3 + 2; // Random start delay
+        this.engineTrail = [];                  // trail dots behind the Lander
     }
 
     update(dt) {
@@ -1264,17 +1652,27 @@ class Lander extends Entity {
         }
 
         super.update(dt);
+
+        // Drop a trail dot every ~3 frames worth of motion.
+        // Trail is local to the Lander, so we record relative offsets.
+        if (Math.random() < 0.6) {
+            this.engineTrail.push({
+                ox: (Math.random() - 0.5) * 8,
+                oy: 8 + Math.random() * 4,
+                age: 0
+            });
+        }
+        // Age existing dots and cull the old ones
+        for (const d of this.engineTrail) d.age += dt;
+        this.engineTrail = this.engineTrail.filter(d => d.age < 0.5);
     }
 
     fire() {
         // Only fire if on screen
         if (!Game.player || Game.player.dead) return;
 
-        // Simple on-screen check (approximate, ignores wrap edge cases for simplicity)
-        // Check relative to camera
-        let rx = this.x - Game.cameraX;
-        while (rx < -100) rx += CONFIG.WORLD_WIDTH;
-        while (rx > Game.width + 100) rx -= CONFIG.WORLD_WIDTH;
+        // On-screen check via shortest-arc wrap
+        const rx = wrapScreenX(this.x - Game.cameraX, Game.width);
 
         if (rx > 0 && rx < Game.width) {
             // Calculate vector to player
@@ -1295,15 +1693,22 @@ class Lander extends Entity {
                 const vx = (dx / dist) * speed;
                 const vy = (dy / dist) * speed;
 
-                // Spawn bullet
-                const b = new Bullet(this.x, this.y, vx, 'enemy');
-                b.vy = vy; // Bullet class default only uses vx, need to allow vy
+                // Spawn bullet via pool
+                const b = Game.bulletPool.acquire();
+                b.init(this.x, this.y, vx, 'enemy', vy);
                 Game.entities.push(b);
             }
         }
     }
 
     draw(ctx) {
+        // Engine trail (drawn first so the body sits on top)
+        for (const d of this.engineTrail) {
+            const a = Math.max(0, 1 - d.age / 0.5) * 0.4;
+            ctx.fillStyle = `rgba(255, 255, 255, ${a.toFixed(3)})`;
+            ctx.fillRect(d.ox - 1, d.oy - 1, 2, 2);
+        }
+
         ctx.strokeStyle = CONFIG.COLORS.enemy;
         ctx.lineWidth = 2;
         // Stronger grey glow
@@ -1333,6 +1738,7 @@ class Lander extends Entity {
         Game.score += 100;
         Game.updateHUD();
         Game.spawnExplosion(this.x, this.y, CONFIG.COLORS.enemy);
+        Game.shake(2);  // Light shake per kill
 
         if (Math.random() < CONFIG.POWERUP_CHANCE) {
             const types = [POWERUPS.SHIELD, POWERUPS.RAPID, POWERUPS.SPEED];
@@ -1400,18 +1806,65 @@ class Bullet extends Entity {
         this.life = 2.0; // Seconds
     }
 
+    // Pool-friendly reset. Used when the bullet pool reuses an instance.
+    init(x, y, vx, owner, vy = 0) {
+        this.x = x;
+        this.y = y;
+        this.vx = vx;
+        this.vy = vy;
+        this.owner = owner;
+        this.life = 2.0;
+        this.dead = false;
+        this.trail = [];
+    }
+
     update(dt) {
         this.life -= dt;
         if (this.life <= 0) this.dead = true;
 
+        const prevX = this.x;
         this.x += this.vx * (dt * 60);
         this.y += this.vy * (dt * 60); // Allow Y movement
 
-        if (this.x < 0) this.x += CONFIG.WORLD_WIDTH;
-        if (this.x > CONFIG.WORLD_WIDTH) this.x -= CONFIG.WORLD_WIDTH;
+        // Modular wrap so a fast bullet can never skip past WORLD_WIDTH in one frame
+        const W = CONFIG.WORLD_WIDTH;
+        const wrapped = ((this.x % W) + W) % W;
+        // Detect world wrap: if delta is greater than W/2 we know we crossed the seam.
+        // In that case, discard the trail — otherwise it would visually teleport.
+        if (Math.abs(this.x - prevX) > W / 2) {
+            this.trail.length = 0;
+        }
+        this.x = wrapped;
+
+        // Push current pos to trail (capped). Drawing happens in draw() with age-based fading.
+        this.trail.push({ x: this.x, y: this.y });
+        if (this.trail.length > 8) this.trail.shift();
     }
 
     draw(ctx) {
+        // Trail — fading dots behind the bullet, drawn in local space.
+        // ctx is translated to (bullet screen-x, bullet.y) at the call site,
+        // so each trail point is drawn relative to that origin.
+        const lx = this.x;     // bullet world X (for offset math)
+        const ly = this.y;     // bullet world Y
+        for (let i = 0; i < this.trail.length; i++) {
+            const t = this.trail[i];
+            const tProgress = (i + 1) / this.trail.length;     // newer = brighter
+            const a = tProgress * 0.5;
+            const dx = t.x - lx;          // world-delta from bullet
+            const dy = t.y - ly;
+            if (this.owner === 'player') {
+                ctx.fillStyle = `rgba(232, 232, 232, ${a.toFixed(3)})`;
+                ctx.fillRect(dx - 4, dy - 1, 8, 2);
+            } else {
+                ctx.fillStyle = `rgba(255, 85, 85, ${a.toFixed(3)})`;
+                ctx.beginPath();
+                ctx.arc(dx, dy, 2, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        // Bullet body (drawn on top of trail)
         if (this.owner === 'player') {
             ctx.fillStyle = CONFIG.COLORS.laser;
             ctx.shadowColor = CONFIG.COLORS.laser;
@@ -1430,8 +1883,108 @@ class Bullet extends Entity {
     }
 }
 
+class Explosion {
+    constructor(x, y, isFlak = false) {
+        this.x = x;
+        this.y = y;
+        this.isFlak = isFlak;
+        this.type = 'explosion';
+        // Lifecycle: expand → retract → fade
+        this.life = 1.0;
+        this.maxRadius = isFlak ? 25 : 60;        // big explosion vs small flak pop
+        this.duration = isFlak ? 0.4 : 0.9;       // seconds
+        this.elapsed = 0;
+        this.done = false;
+        this.shockwave = isFlak ? 0 : 1.0;       // shockwave strength (0..1)
+    }
+
+    init(x, y, isFlak = false) {
+        this.x = x;
+        this.y = y;
+        this.isFlak = isFlak;
+        this.life = 1.0;
+        this.maxRadius = isFlak ? 25 : 60;
+        this.duration = isFlak ? 0.4 : 0.9;
+        this.elapsed = 0;
+        this.done = false;
+        this.shockwave = isFlak ? 0 : 1.0;
+    }
+
+    update(dt) {
+        this.elapsed += dt;
+        const t = Math.min(this.elapsed / this.duration, 1.0);
+        // Expand-fast, retract-slow: half-cosine wave so the ring overshoots
+        // and collapses back, mimicking a shock front.
+        this.life = Math.max(0, 1.0 - t);
+        if (t >= 1.0) {
+            this.done = true;
+        }
+    }
+
+    draw(ctx) {
+        const t = Math.min(this.elapsed / this.duration, 1.0);
+        // Two-phase radius: expand to maxRadius*1.1 by 0.4t, then retract to 0
+        let r;
+        if (t < 0.4) {
+            r = this.maxRadius * (1.0 + (t / 0.4) * 0.1);
+        } else {
+            const r2 = (t - 0.4) / 0.6;
+            r = this.maxRadius * (1.1 - r2 * 1.1);
+        }
+        if (r <= 0) return;
+
+        ctx.save();
+        ctx.translate(this.x, this.y);
+
+        // Outer shockwave — soft expanding ring (only on big explosions)
+        if (this.shockwave > 0 && t < 0.5) {
+            const sw = (1.0 - t / 0.5);
+            const swAlpha = sw * 0.45;
+            ctx.beginPath();
+            ctx.arc(0, 0, r * 1.4, 0, Math.PI * 2);
+            ctx.strokeStyle = `rgba(255, 255, 255, ${swAlpha.toFixed(3)})`;
+            ctx.lineWidth = 2;
+            ctx.stroke();
+        }
+
+        // Main ring
+        const ringAlpha = this.life * 0.85;
+        ctx.beginPath();
+        ctx.arc(0, 0, r, 0, Math.PI * 2);
+        ctx.strokeStyle = `rgba(255, 255, 255, ${ringAlpha.toFixed(3)})`;
+        ctx.lineWidth = this.isFlak ? 1.5 : 3;
+        ctx.shadowColor = '#ffffff';
+        ctx.shadowBlur = this.isFlak ? 6 : 14;
+        ctx.stroke();
+
+        // Bright core (white dot at center while life is high)
+        if (this.life > 0.4) {
+            const coreAlpha = (this.life - 0.4) / 0.6;
+            ctx.beginPath();
+            ctx.arc(0, 0, r * 0.35, 0, Math.PI * 2);
+            ctx.fillStyle = `rgba(255, 255, 255, ${coreAlpha.toFixed(3)})`;
+            ctx.fill();
+        }
+
+        ctx.restore();
+    }
+}
+
 class Particle {
     constructor(x, y, color) {
+        this.x = x;
+        this.y = y;
+        this.color = color;
+        const angle = Math.random() * Math.PI * 2;
+        const speed = Math.random() * 5;
+        this.vx = Math.cos(angle) * speed;
+        this.vy = Math.sin(angle) * speed;
+        this.life = 1.0;
+        this.decay = Math.random() * 0.05 + 0.02;
+    }
+
+    // Pool-friendly reset. Used when the particle pool reuses an instance.
+    init(x, y, color) {
         this.x = x;
         this.y = y;
         this.color = color;
